@@ -1,4 +1,1 @@
-oopa
-====
-
-oopa - object-oriented physics analysis
+opal - Object-oriented Physics Analysis Library
