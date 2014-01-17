@@ -1,1 +1,1 @@
-opal - Object-oriented Physics Analysis Library
+dose - data objects for small experiments
