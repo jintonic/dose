@@ -1,1 +1,1 @@
-dose - data objects for small experiments
+NICE - NaI Cooled Experiment
