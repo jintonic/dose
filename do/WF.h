@@ -2,6 +2,7 @@
 #define WF_H
 
 #include "PMT.h"
+#include "DGTZ.h"
 #include <TClonesArray.h>
 
 namespace NICE { class WF; }
@@ -14,13 +15,13 @@ class NICE::WF
          kNormal=0,
       }
 
-      Short_t id, ch, mo, cr;
       Status st;
 
       std::vector<Double_t> sample;
 
       TClonesArray pulses;
       PMT pmt;
+      DGTZ dgtz;
 
       WF() {};
       virtual ~WF() {};

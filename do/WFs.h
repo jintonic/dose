@@ -11,6 +11,8 @@ class NICE::WFs : public TClonesArray
       WFs() : TClonesArray {};
       virtual ~WFs() {};
 
+      Int_t run, sub, evt;
+
       WF* Add(WF *wf=0) { return 0; }
 
       ClassDef(WFs,1);
