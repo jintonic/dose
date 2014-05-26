@@ -1,6 +1,8 @@
 #ifndef WFS_H
 #define WFS_H
 
+#include <TClonesArray.h>
+
 #include "WF.h"
 
 namespace NICE { class WFs; }
@@ -8,10 +10,14 @@ namespace NICE { class WFs; }
 class NICE::WFs : public TClonesArray
 {
    public:
-      WFs() : TClonesArray {};
+      int run, sub, evt;
+      double time;
+
+   public:
+      WFs(int run=-1) : TClonesArray(), run(run) {};
       virtual ~WFs() {};
 
-      Int_t run, sub, evt;
+      void LoadDatabase(const char *db="/path/to/db");
 
       WF* Add(WF *wf=0) { return 0; }
 

@@ -1,0 +1,8 @@
+*~
+*.d
+*.d.*
+*.o
+*.so
+*.root
+*.rootmap
+Rootified*

@@ -62,7 +62,7 @@ LIBS    += $(ROOTLIBS)
 
 ROOTCINT = rootcint
 
-ROOTIFIED_SOURCE := $(LIBNAME)Dict.cc
+ROOTIFIED_SOURCE := Rootified$(LIBNAME).cc
 ROOTIFIED_HEADER := $(ROOTIFIED_SOURCE:.cc=.h)
 ROOTIFIED_OBJECT := $(ROOTIFIED_SOURCE:.cc=.o)
 
@@ -107,7 +107,7 @@ RLIBMAP = rlibmap
 # the first target is the default target, it depends on $(ROOTMAP)
 # before "make all", make will include all other makefiles specified
 # by the include command
-all: $(EXES)
+all: $(ROOTMAP)
 	@echo
 	@echo "* Done!"
 	@echo 
@@ -172,13 +172,10 @@ info:
 	@echo
 
 clean:
-	$(RM) *.o *.exe *.d *.d.* *~ *Dict* $(ROOTMAP) $(LIBRARY)
+	$(RM) *.o *.d *.d.* *~ Rootified* $(ROOTMAP) $(LIBRARY)
 
 tags:
 	ctags --c-kinds=+p $(HEADERS) $(SOURCES)
-
-$(EXES): %.exe:%.C install
-	$(CXX) $< $(CXXFLAGS) $(LIBS) -lGeom -L. -l$(LIBNAME) -o $@
 
 install: $(ROOTMAP)
 	@echo

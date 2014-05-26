@@ -1,30 +1,41 @@
 #ifndef WF_H
 #define WF_H
 
-#include "PMT.h"
-#include "DGTZ.h"
-#include <TClonesArray.h>
+#include <vector>
+#include <TObject.h>
+
+#include "Electronics.h"
 
 namespace NICE { class WF; }
 
-class NICE::WF
+class NICE::WF : public Electronics, public TObject
 {
    public:
-      enum Status {
-         kNoisy,
-         kNormal=0,
-      }
+      enum Type {
+         kCalibrated,
+         kRaw,
+      };
+      Type type; 
 
-      Status st;
+      double freq;
 
-      std::vector<Double_t> sample;
+      std::vector<double> sample;
 
-      TClonesArray pulses;
-      PMT pmt;
-      DGTZ dgtz;
-
-      WF() {};
+      WF(): Electronics(), TObject(), type(kRaw), freq(0) {};
       virtual ~WF() {};
+
+      bool IsSimilarTo(const WF& other) const;
+      void MakeSimilarTo(const WF& other);
+
+      WF& operator+=(const WF& other); 
+      WF& operator-=(const WF& other); 
+      WF& operator*=(const WF& other); 
+      WF& operator/=(const WF& other); 
+
+      WF& operator+=(double value); 
+      WF& operator-=(double value) { return (*this) += -value; }
+      WF& operator*=(double value); 
+      WF& operator/=(double value);
 
       ClassDef(WF,1);
 };
