@@ -141,7 +141,7 @@ $(ROOTMAP): $(LIBRARY)
 $(LIBRARY): $(ROOTIFIED_OBJECT) $(OBJECTS)
 	@echo
 	@echo "* Creating shared library:"
-	$(CXX) $(CXXFLAGS) $(LIBS) $(SOFLAGS) -o $@ $^
+	$(CXX) $^ $(CXXFLAGS) $(LIBS) $(SOFLAGS) -o $@
 
 # An xxx.o file depends on xxx.cc. It is created with the command:
 # 	g++ -c xxx.cc -o xxx.o
@@ -167,8 +167,6 @@ info:
 	@echo "compiler: $(CXX)"
 	@echo "flags:    $(CXXFLAGS)"
 	@echo "libs:     $(LIBS)"
-	@echo
-	@echo "executables:$(EXES)"
 	@echo
 
 clean:
@@ -212,8 +210,6 @@ install: $(ROOTMAP)
 	  cp *.h $(PREFIX)/include/$(LIBNAME); \
 	fi
 	@echo "done."
-	@echo
-	@echo "* Create executables:"
 
 uninstall:
 	$(RM) -r $(PREFIX)/include/$(LIBNAME)
