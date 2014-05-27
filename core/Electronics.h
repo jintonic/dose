@@ -1,33 +1,40 @@
-#ifndef ELECTRONICS_H
-#define ELECTRONICS_H
+#ifndef PMT_H
+#define PMT_H
 
-namespace NICE { class Electronics; }
+namespace NICE { class PMT; }
 
-class NICE::Electronics
+class NICE::PMT
 {
    public:
       enum Status {
          kDead,
-         kNormal=0,
+         kFlashing,
          kNoisy,
+         kNormal=0,
+         kHighGain,
       };
 
       /**
-       * Status of this channel
+       * PMT status
        */
-      Status st; // status
+      Status st; // PMT status
       /**
-       * Id of PMT connected to this channel
+       * PMT id
+       * Normal PMT id starts from 0.
+       * id == -1: empty channel
+       * id == -10: TRG input
+       * id == -20; LED input
        */
       short id; // PMT id
       /**
-       * Id of this channel
-       * It equals to crate*Nmo*Nch + module*Nch + channel
+       * PMT channel number
+       * It equals to crate*Nmo*Nch + module*Nch + channel,
+       * where crate, module and channel all start from 0.
        */
-      short ch; // channel id
+      short ch; // PMT channel number
 
-      Electronics(): st(kNormal), id(-1), ch(-1) {};
-      virtual ~Electronics() {};
+      PMT(): st(kNormal), id(-1), ch(-1) {};
+      virtual ~PMT() {};
 };
 
 #endif
