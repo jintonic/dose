@@ -6,7 +6,7 @@ namespace NICE { class Logger; }
 class NICE::Logger
 {
    public:
-      static const int gVerbosity; ///< global verbosity
+      static int gVerbosity; ///< global verbosity
       int verbosity; ///< local verbosity
 
       Logger(): verbosity(0) {};

@@ -1,6 +1,6 @@
 #include "Logger.h"
 
-const int NICE::Logger::gVerbosity = 0;
+int NICE::Logger::gVerbosity = 0;
 
 int NICE::Logger::GetVerbosity()
 {

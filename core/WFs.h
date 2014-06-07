@@ -9,6 +9,18 @@ namespace NICE { class WFs; }
 
 class NICE::WFs : public TClonesArray
 {
+   private:
+      PMT* Map(int ch); ///< map ch to pmt
+      void LoadTimeOffset(PMT* aPMT);
+      void LoadMeanOf1PE(PMT* aPMT);
+      void LoadStatus(PMT* aPMT);
+
+   protected:
+      /**
+       * /path/to/pmt
+       */
+      TString fDB; //! /path/to/pmt/
+
    public:
       /**
        * Run number
@@ -17,23 +29,45 @@ class NICE::WFs : public TClonesArray
       /**
        * Sub run number
        */
-      int sub; // sub run number
+      short sub; // sub run number
       /**
        * Event id
        */
       int evt; // event id
       /**
-       * Linux time of event
+       * Trigger count
        */
-      double time; // Linux time of event
+      int cnt; // trigger count
+      /**
+       * Seconds to Unix epoch
+       */
+      int sec; // Linux time of event in second
+      /**
+       * Total number of available channels
+       */
+      short nch; // number of available channels
+      /**
+       * Maximal number of samples of a waveform
+       */
+      size_t nmax; // max number of samples of a wf
+      /**
+       * Number of samples after non-0-suppressed window
+       */
+      int nfw; // # of samples after non-0-suppressed window
+      /**
+       * Number of samples before non-0-suppressed window
+       */
+      int nbw; // # of samples before non-0-suppressed window
+      /**
+       * Threshold for software 0-suppression
+       */
+      int thr; // threshold for software 0-suppression
 
    public:
-      WFs(int run=999999) : TClonesArray(), run(run) {};
+      WFs(int run=999999) : TClonesArray("WF", 8), run(run) { nch=fSize; }
       virtual ~WFs() {};
 
-      void LoadDatabase(const char *db="/path/to/db");
-
-      WF* Add(WF *wf=0) { return 0; }
+      void Initialize(const char *db="/path/to/pmt");
 
       ClassDef(WFs,1);
 };

@@ -2,13 +2,12 @@
 #define WF_H
 
 #include <vector>
-#include <TObject.h>
 
-#include "Electronics.h"
+#include "PMT.h"
 
 namespace NICE { class WF; }
 
-class NICE::WF : public Electronics, public TObject
+class NICE::WF : public PMT
 {
    public:
       enum Type {
@@ -17,11 +16,18 @@ class NICE::WF : public Electronics, public TObject
       };
       Type type; 
 
-      double freq;
+      /**
+       * Sampling frequency
+       */
+      double freq; // sampling frequency
+      /**
+       * Pedestal
+       */
+      double ped; // pedestal
 
       std::vector<double> sample;
 
-      WF(): Electronics(), TObject(), type(kRaw), freq(0) {};
+      WF(): PMT(), type(kRaw), freq(0), ped(0) {};
       virtual ~WF() {};
 
       bool IsSimilarTo(const WF& other) const;

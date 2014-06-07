@@ -62,7 +62,7 @@ LIBS    += $(ROOTLIBS)
 
 ROOTCINT = rootcint
 
-ROOTIFIED_SOURCE := Rootified$(LIBNAME).cc
+ROOTIFIED_SOURCE := $(LIBNAME).cc
 ROOTIFIED_HEADER := $(ROOTIFIED_SOURCE:.cc=.h)
 ROOTIFIED_OBJECT := $(ROOTIFIED_SOURCE:.cc=.o)
 
@@ -170,7 +170,7 @@ info:
 	@echo
 
 clean:
-	$(RM) *.o *.d *.d.* *~ Rootified* $(ROOTMAP) $(LIBRARY)
+	$(RM) *.o *.d *.d.* *~ *$(LIBNAME)* $(ROOTMAP) $(LIBRARY)
 
 tags:
 	ctags --c-kinds=+p $(HEADERS) $(SOURCES)
