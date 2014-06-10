@@ -10,7 +10,16 @@ using namespace std;
 #include <UNIC/Units.h>
 using namespace UNIC;
 
+#include "WF.h"
 #include "WFs.h"
+
+NICE::WFs::WFs(int run) : TObject(), run(run), sub(-1), evt(-1), cnt(0),
+   sec(0), nch(8), nmax(0), nfw(0), nbw(0), thr(0)
+{
+   wfs.SetClass("NICE::WF",nch);
+}
+
+//------------------------------------------------------------------------------
 
 void NICE::WFs::Initialize(const char* db)
 {
@@ -45,13 +54,15 @@ void NICE::WFs::Initialize(const char* db)
          continue;
       }
 
-      PMT *aPMT = Map(atoi(ch[i]->d_name));
-      if (aPMT && aPMT->id>=0) {
-         LoadTimeOffset(aPMT);
-         LoadMeanOf1PE(aPMT);
-         LoadStatus(aPMT);
+      WF *wf = Map(atoi(ch[i]->d_name));
+      if (wf) {
+         if (wf->pmt.id>=0) {
+            LoadTimeOffset(wf);
+            LoadMeanOf1PE(wf);
+            LoadStatus(wf);
+         }
+         wf->pmt.Dump();
       }
-      aPMT->Dump();
 
       free(ch[i]);
    }
@@ -60,7 +71,7 @@ void NICE::WFs::Initialize(const char* db)
 
 //------------------------------------------------------------------------------
 
-NICE::PMT* NICE::WFs::Map(int ch)
+NICE::WF* NICE::WFs::Map(int ch)
 {
    if (ch<0) {
       Error("Map", "cannot handle channel number %d", ch);
@@ -75,39 +86,39 @@ NICE::PMT* NICE::WFs::Map(int ch)
       return 0;
    }
 
-   PMT *aPMT = 0;
+   WF *wf = 0;
    Int_t runnum, id;
    while (file>>runnum>>id) {
       if (run<runnum) continue;
-      aPMT = (PMT*) ConstructedAt(ch);
+      wf = (WF*) wfs.ConstructedAt(ch);
       break;
    }
 
    file.close();
 
-   if (!aPMT) {
+   if (!wf) {
       Error("Map", "no PMT mapped to ch %d in run %d", ch, run);
       Error("Map", "return 0");
       return 0;
    }
 
-   aPMT->ch = ch;
-   aPMT->id = id;
-   return aPMT;
+   wf->pmt.ch = ch;
+   wf->pmt.id = id;
+   return wf;
 }
 
 //------------------------------------------------------------------------------
 
-void NICE::WFs::LoadTimeOffset(PMT* pmt)
+void NICE::WFs::LoadTimeOffset(WF* wf)
 {
-   if (!pmt) {
+   if (!wf) {
       Error("LoadTimeOffset", "NULL pointer to PMT, return");
       return;
    }
 
-   ifstream file(Form("%s/%d/dt.txt", fDB.Data(), pmt->ch), ios::in);
+   ifstream file(Form("%s/%d/dt.txt", fDB.Data(), wf->pmt.ch), ios::in);
    if (!(file.is_open())) {
-      Error("LoadTimeOffset", "cannot read %s/%d/dt.txt", fDB.Data(), pmt->ch);
+      Error("LoadTimeOffset", "cannot read %s/%d/dt.txt", fDB.Data(), wf->pmt.ch);
       Error("LoadTimeOffset", "return");
       return;
    }
@@ -116,7 +127,7 @@ void NICE::WFs::LoadTimeOffset(PMT* pmt)
    double dt;
    while (file>>runnum>>dt) {
       if (run<runnum) continue;
-      pmt->dt = dt*ns;
+      wf->pmt.dt = dt*ns;
       break;
    }
 
@@ -125,16 +136,16 @@ void NICE::WFs::LoadTimeOffset(PMT* pmt)
 
 //------------------------------------------------------------------------------
 
-void NICE::WFs::LoadMeanOf1PE(PMT* pmt)
+void NICE::WFs::LoadMeanOf1PE(WF* wf)
 {
-   if (!pmt) {
+   if (!wf) {
       Error("LoadMeanOf1PE", "NULL pointer to PMT, return");
       return;
    }
 
-   ifstream file(Form("%s/%d/gain.txt", fDB.Data(), pmt->ch), ios::in);
+   ifstream file(Form("%s/%d/gain.txt", fDB.Data(), wf->pmt.ch), ios::in);
    if (!(file.is_open())) {
-      Error("LoadMeanOf1PE", "cannot read %s/%d/gain.txt", fDB.Data(), pmt->ch);
+      Error("LoadMeanOf1PE", "cannot read %s/%d/gain.txt", fDB.Data(), wf->pmt.ch);
       Error("LoadMeanOf1PE", "return");
       return;
    }
@@ -143,7 +154,7 @@ void NICE::WFs::LoadMeanOf1PE(PMT* pmt)
    double gain;
    while (file>>runnum>>gain) {
       if (run<runnum) continue;
-      pmt->gain = gain;
+      wf->pmt.gain = gain;
       break;
    }
 
@@ -152,16 +163,16 @@ void NICE::WFs::LoadMeanOf1PE(PMT* pmt)
 
 //------------------------------------------------------------------------------
 
-void NICE::WFs::LoadStatus(PMT* pmt)
+void NICE::WFs::LoadStatus(WF* wf)
 {
-   if (!pmt) {
+   if (!wf) {
       Error("LoadStatus", "NULL pointer to PMT, return");
       return;
    }
 
-   ifstream file(Form("%s/%d/status.txt", fDB.Data(), pmt->ch), ios::in);
+   ifstream file(Form("%s/%d/status.txt", fDB.Data(), wf->pmt.ch), ios::in);
    if (!(file.is_open())) {
-      Error("LoadStatus", "cannot read %s/%d/status.txt", fDB.Data(), pmt->ch);
+      Error("LoadStatus", "cannot read %s/%d/status.txt", fDB.Data(), wf->pmt.ch);
       Error("LoadStatus", "return");
       return;
    }
@@ -170,7 +181,7 @@ void NICE::WFs::LoadStatus(PMT* pmt)
    TString st;
    while (file>>runnum>>st) {
       if (run<runnum) continue;
-      pmt->SetStatus(st);
+      wf->pmt.SetStatus(st);
       break;
    }
 
