@@ -1,9 +1,11 @@
 #ifndef PULSE_H
 #define PULSE_H
 
+#include <TObject.h>
+
 namespace NICE { class Pulse; }
 
-class NICE::Pulse
+class NICE::Pulse : public TObject
 {
    public:
       /**
@@ -15,8 +17,10 @@ class NICE::Pulse
        */
       int end; // end position in the waveform
 
-      Pulse(): bgn(0), end(0) {};
+      Pulse() : TObject(), bgn(0), end(0) {};
       virtual ~Pulse() {};
+
+      ClassDef(Pulse,1);
 };
 
 #endif
