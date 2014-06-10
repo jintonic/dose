@@ -4,18 +4,22 @@
 #include <TObject.h>
 
 namespace NICE { class PMT; }
-
+/**
+ * PMT information
+ * It inherits Info(), Warning(), etc. functions from TObject to dump
+ * information in terminal with <NICE::PMT::Function> prefixed.
+ */
 class NICE::PMT: public TObject
 {
    public:
       enum Status {
+         kUnknown,
          kDead,
          kFlashing,
          kNoisy,
          kOk,
          kAttenuated,
       };
-
       /**
        * PMT status
        */
@@ -44,7 +48,7 @@ class NICE::PMT: public TObject
        */
       double gain; // mean of 1 PE distribution
 
-      PMT(): TObject(), st(kOk), id(-1), ch(-1), dt(0), gain(1) {};
+      PMT(): TObject(), st(kUnknown), id(-1), ch(-1), dt(0), gain(1) {};
       virtual ~PMT() {};
 
       void SetStatus(const char *status);
