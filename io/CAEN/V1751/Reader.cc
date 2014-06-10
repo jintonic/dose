@@ -23,7 +23,7 @@ void Reader::LoadIndex()
    const char *name=Form("%s/%s.idx", fPath.Data(), fName.Data());
    ifstream idx(name, ios::in);
    if (!idx.is_open()) {
-      Info("LoadIndex","cannot open %s, return",name);
+      Info("LoadIndex","no %s",name);
       return;
    }
 
