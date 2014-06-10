@@ -2,7 +2,9 @@
 
 #include "WF.h"
 
-bool NICE::WF::IsSimilarTo(const WF& other) const
+using namespace NICE;
+
+bool WF::IsSimilarTo(const WF& other) const
 {
    bool similar = samples.size()==other.samples.size() && 
       freq==other.freq && type==other.type;
@@ -12,7 +14,7 @@ bool NICE::WF::IsSimilarTo(const WF& other) const
 
 //------------------------------------------------------------------------------
 
-void NICE::WF::MakeSimilarTo(const WF& other)
+void WF::MakeSimilarTo(const WF& other)
 {
    samples.resize(other.samples.size());
    freq = other.freq;
@@ -21,7 +23,7 @@ void NICE::WF::MakeSimilarTo(const WF& other)
 
 //------------------------------------------------------------------------------
 
-NICE::WF& NICE::WF::operator+=(const WF& other)
+WF& WF::operator+=(const WF& other)
 {
    if (IsSimilarTo(other)==kFALSE) {
       Warning("operator+=", 
@@ -36,7 +38,7 @@ NICE::WF& NICE::WF::operator+=(const WF& other)
 
 //------------------------------------------------------------------------------
 
-NICE::WF& NICE::WF::operator-=(const WF& other)
+WF& WF::operator-=(const WF& other)
 {
    if (IsSimilarTo(other)==kFALSE) {
       Warning("operator-=", 
@@ -51,7 +53,7 @@ NICE::WF& NICE::WF::operator-=(const WF& other)
 
 //------------------------------------------------------------------------------
 
-NICE::WF& NICE::WF::operator*=(const WF& other)
+WF& WF::operator*=(const WF& other)
 {
    if (IsSimilarTo(other)==kFALSE) {
       Warning("operator*=", 
@@ -66,7 +68,7 @@ NICE::WF& NICE::WF::operator*=(const WF& other)
 
 //------------------------------------------------------------------------------
 
-NICE::WF& NICE::WF::operator/=(const WF& other)
+WF& WF::operator/=(const WF& other)
 {
    if(!IsSimilarTo(other)) {
       return *this;
@@ -80,7 +82,7 @@ NICE::WF& NICE::WF::operator/=(const WF& other)
 
 //------------------------------------------------------------------------------
 
-NICE::WF& NICE::WF::operator+=(double value)
+WF& WF::operator+=(double value)
 {
    for (size_t i=0; i<samples.size(); i++) samples[i] += value;
 
@@ -89,7 +91,7 @@ NICE::WF& NICE::WF::operator+=(double value)
 
 //------------------------------------------------------------------------------
 
-NICE::WF& NICE::WF::operator*=(double value)
+WF& WF::operator*=(double value)
 {
    for (size_t i=0; i<samples.size(); i++) samples[i] *= value;
 
@@ -98,7 +100,7 @@ NICE::WF& NICE::WF::operator*=(double value)
 
 //------------------------------------------------------------------------------
 
-NICE::WF& NICE::WF::operator/=(double value) 
+WF& WF::operator/=(double value) 
 { 
    if (value==0.0) {
       Warning("operator/", "Cannot be divided by zero! Do nothing.");
@@ -109,3 +111,4 @@ NICE::WF& NICE::WF::operator/=(double value)
 }
 
 //------------------------------------------------------------------------------
+
