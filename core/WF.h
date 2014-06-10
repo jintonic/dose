@@ -3,12 +3,18 @@
 
 #include <vector>
 
+#include <TClonesArray.h>
+
 #include "PMT.h"
 #include "Pulse.h"
 
 namespace NICE { class WF; }
-
-class NICE::WF : public PMT
+/**
+ * Waveform information.
+ * It uses PMT instead of inheritting it so that tree->Show(1) lists items like
+ * wfs.pmt.id instead of wfs.id.
+ */
+class NICE::WF : public TObject
 {
    public:
       enum Type {
@@ -41,9 +47,14 @@ class NICE::WF : public PMT
       /**
        * Array of pulses
        */
-      std::vector<Pulse> pulses; // array of pulses
+      TClonesArray pulses; // array of pulses
 
-      WF(): PMT(), type(kRaw), freq(0), ped(0), prms(0), ttrg(0) {};
+      /**
+       * Information of related PMT
+       */
+      PMT pmt; // information of related PMT
+
+      WF(): type(kRaw), freq(0), ped(0), prms(0), ttrg(0) {};
       virtual ~WF() {};
 
       bool IsSimilarTo(const WF& other) const;
