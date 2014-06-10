@@ -13,7 +13,7 @@ void NICE::PMT::SetStatus(const char* status)
    else if (status[0]=='n') st = kNoisy;
    else if (status[0]=='o') st = kOk;
    else if (status[0]=='a') st = kAttenuated;
-   else Warning("SetStatus", "status, %s, is unknown", status);
+   else st = kUnknown;
 }
 
 //------------------------------------------------------------------------------
