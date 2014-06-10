@@ -19,21 +19,18 @@ using namespace NICE;
 void b2r(int run, int sub=1, const char* dir=".")
 {
    Reader input(run, sub, dir);
-   TFile *output = new TFile(Form("%s.root",input.GetFile()),"recreate");
-   TTree *t = new TTree("t",Form("events in run %d, sub run %d", run, sub));
-   t->Branch("wfs", "NICE::WFs", &input, 32000, 3);
+   TFile output(Form("%s.root",input.GetFile()),"recreate");
+   TTree t("t",Form("events in run %d, sub run %d", run, sub));
+   t.Branch("wfs", "NICE::WFs", &input, 32000, 3);
 
    cout<<input.GetEntries()<<" entries to be processed"<<endl;
-   for (int i=0; i<2; i++) {
-   //for (int i=0; i<input.GetEntries(); i++) {
+   for (int i=0; i<input.GetEntries(); i++) {
       input.GetEntry(i);
-      t->Fill();
+      t.Fill();
       if (i%5000==0) cout<<"entry "<<i<<" processed"<<endl;
    }
-   output->Write();
-   output->Close(); // TTree is deleted here
-   delete output;
-   input.Close();
+   output.Write();
+   output.Close();
    cout<<"done"<<endl;
 }
 
