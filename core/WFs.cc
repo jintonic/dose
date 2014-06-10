@@ -12,16 +12,17 @@ using namespace UNIC;
 
 #include "WF.h"
 #include "WFs.h"
+using namespace NICE;
 
-NICE::WFs::WFs(int run) : TObject(), run(run), sub(-1), evt(-1), cnt(0),
-   sec(0), nch(8), nmax(0), nfw(0), nbw(0), thr(0)
+WFs::WFs(int run) : TObject(), run(run), sub(-1), evt(-1), cnt(0), sec(0),
+   nch(8), nmax(0), nfw(0), nbw(0), thr(0)
 {
    wfs.SetClass("NICE::WF",nch);
 }
 
 //------------------------------------------------------------------------------
 
-void NICE::WFs::Initialize(const char* db)
+void WFs::Initialize(const char* db)
 {
    fDB=db;
    struct stat st;
@@ -71,7 +72,7 @@ void NICE::WFs::Initialize(const char* db)
 
 //------------------------------------------------------------------------------
 
-NICE::WF* NICE::WFs::Map(int ch)
+WF* WFs::Map(int ch)
 {
    if (ch<0) {
       Error("Map", "cannot handle channel number %d", ch);
@@ -109,7 +110,7 @@ NICE::WF* NICE::WFs::Map(int ch)
 
 //------------------------------------------------------------------------------
 
-void NICE::WFs::LoadTimeOffset(WF* wf)
+void WFs::LoadTimeOffset(WF* wf)
 {
    if (!wf) {
       Error("LoadTimeOffset", "NULL pointer to PMT, return");
@@ -136,7 +137,7 @@ void NICE::WFs::LoadTimeOffset(WF* wf)
 
 //------------------------------------------------------------------------------
 
-void NICE::WFs::LoadMeanOf1PE(WF* wf)
+void WFs::LoadMeanOf1PE(WF* wf)
 {
    if (!wf) {
       Error("LoadMeanOf1PE", "NULL pointer to PMT, return");
@@ -163,7 +164,7 @@ void NICE::WFs::LoadMeanOf1PE(WF* wf)
 
 //------------------------------------------------------------------------------
 
-void NICE::WFs::LoadStatus(WF* wf)
+void WFs::LoadStatus(WF* wf)
 {
    if (!wf) {
       Error("LoadStatus", "NULL pointer to PMT, return");
@@ -186,6 +187,18 @@ void NICE::WFs::LoadStatus(WF* wf)
    }
 
    file.close();
+}
+
+//------------------------------------------------------------------------------
+
+WF* WFs::At(unsigned short i) const
+{
+   if (i>=wfs.GetEntries()) {
+      Warning("operator[]", 
+            "index %d >= %d (max), return 0", i, wfs.GetEntries());
+      return 0;
+   }
+   return (WF*) wfs.At(i);
 }
 
 //------------------------------------------------------------------------------
