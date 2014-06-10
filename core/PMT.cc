@@ -5,8 +5,9 @@ using namespace std;
 using namespace UNIC;
 
 #include "PMT.h"
+using namespace NICE;
 
-void NICE::PMT::SetStatus(const char* status)
+void PMT::SetStatus(const char* status)
 {
    if (status[0]=='d') st = kDead;
    else if (status[0]=='f') st = kFlashing;
@@ -18,7 +19,7 @@ void NICE::PMT::SetStatus(const char* status)
 
 //------------------------------------------------------------------------------
 
-const char* NICE::PMT::GetStatus() const
+const char* PMT::GetStatus() const
 {
    if (st==kDead) return "dead";
    else if (st==kFlashing) return "flashing";
@@ -30,7 +31,7 @@ const char* NICE::PMT::GetStatus() const
 
 //------------------------------------------------------------------------------
 
-void NICE::PMT::Dump() const
+void PMT::Dump() const
 {
    if (id>=0) Info("Dump", "ch %2d: PMT %2d (gain =%4.1f, dt =%6.1f*ns, %s)", 
          ch, id, gain, dt/ns, GetStatus());
