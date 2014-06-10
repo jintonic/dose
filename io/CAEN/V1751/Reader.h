@@ -10,10 +10,11 @@
 class Reader: public NICE::WFs, public NICE::Logger
 {
    private:
-      ifstream *fRaw;
-      TString fPath, fName;
-      std::vector<size_t> fBegin;
-      std::vector<size_t> fSize;
+      ifstream *fRaw;///< pointer to binary file
+      TString fPath; ///< path to binary file
+      TString fName; ///< name of binary file
+      std::vector<size_t> fBegin; ///< beginning of each event
+      std::vector<size_t> fSize; ///< size of each event
 
       /**
        * Event header defined by CAEN
@@ -53,14 +54,14 @@ class Reader: public NICE::WFs, public NICE::Logger
 
    public:
       Reader(int run, int sub=1, const char *dir=".");
-      virtual ~Reader() {};
+      virtual ~Reader() { Close(); }
 
       const char* GetFile() { return fName.Data(); }
 
       void Close() { if (fRaw) if (fRaw->is_open()) fRaw->close(); }
 
       int GetEntries() { return fBegin.size(); }
-      void GetEntry(int i=0);
+      void GetEntry(int i);
 
       void LoadIndex();
       void Index();
