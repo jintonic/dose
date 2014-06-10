@@ -85,7 +85,7 @@ endif
 $(EXES):%.exe:%.C $(OBJECTS)
 	@echo
 	@echo "* Creating executables:"
-	$(CXX) $< $(CXXFLAGS) -L$(NICE)/lib -lNICE $(LIBS) -o $@
+	$(CXX) $< $(OBJECTS) $(CXXFLAGS) -L$(NICE)/lib -lNICE $(LIBS) -o $@
 
 clean:
 	$(RM) *.exe *.o *.d *.d.* *~

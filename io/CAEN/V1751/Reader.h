@@ -59,6 +59,7 @@ class Reader: public NICE::WFs, public NICE::Logger
 
       void Close() { if (fRaw) if (fRaw->is_open()) fRaw->close(); }
 
+      int GetEntries() { return fBegin.size(); }
       void GetEntry(int i=0);
 
       void LoadIndex();

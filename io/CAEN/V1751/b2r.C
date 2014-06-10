@@ -21,13 +21,14 @@ void b2r(int run, int sub=1, const char* dir=".")
    Reader input(run, sub, dir);
    TFile *output = new TFile(Form("%s.root",input.GetFile()),"recreate");
    TTree *t = new TTree("t",Form("events in run %d, sub run %d", run, sub));
-   t->Branch("wfs", "WFs", &input, 32000, 3);
+   t->Branch("wfs", "NICE::WFs", &input, 32000, 3);
 
-   cout<<input.entries<<" entries to be processed"<<endl;
-   for (int i=0; i<input.entries; i++) {
+   cout<<input.GetEntries()<<" entries to be processed"<<endl;
+   for (int i=0; i<2; i++) {
+   //for (int i=0; i<input.GetEntries(); i++) {
       input.GetEntry(i);
       t->Fill();
-      if (i%5000==0) cout<<"entry "<<i<<" processed";
+      if (i%5000==0) cout<<"entry "<<i<<" processed"<<endl;
    }
    output->Write();
    output->Close(); // TTree is deleted here

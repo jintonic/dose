@@ -4,7 +4,7 @@
 
 bool NICE::WF::IsSimilarTo(const WF& other) const
 {
-   bool similar = sample.size()==other.sample.size() && 
+   bool similar = samples.size()==other.samples.size() && 
       freq==other.freq && type==other.type;
 
    return similar;
@@ -14,7 +14,7 @@ bool NICE::WF::IsSimilarTo(const WF& other) const
 
 void NICE::WF::MakeSimilarTo(const WF& other)
 {
-   sample.resize(other.sample.size());
+   samples.resize(other.samples.size());
    freq = other.freq;
    type = other.type;
 }
@@ -29,7 +29,7 @@ NICE::WF& NICE::WF::operator+=(const WF& other)
       return *this;
    }
 
-   for (size_t i=0; i<sample.size(); i++) sample[i] += other.sample[i];
+   for (size_t i=0; i<samples.size(); i++) samples[i] += other.samples[i];
 
    return *this;
 }
@@ -44,7 +44,7 @@ NICE::WF& NICE::WF::operator-=(const WF& other)
       return *this;
    }
 
-   for (size_t i=0; i<sample.size(); i++) sample[i] -= other.sample[i];
+   for (size_t i=0; i<samples.size(); i++) samples[i] -= other.samples[i];
 
    return *this;
 }
@@ -59,7 +59,7 @@ NICE::WF& NICE::WF::operator*=(const WF& other)
       return *this;
    }
 
-   for (size_t i=0; i<sample.size(); i++) sample[i] *= other.sample[i];
+   for (size_t i=0; i<samples.size(); i++) samples[i] *= other.samples[i];
 
    return *this;
 }
@@ -72,8 +72,8 @@ NICE::WF& NICE::WF::operator/=(const WF& other)
       return *this;
    }
 
-   for (size_t i=0; i<sample.size(); i++)
-      sample[i] /= (other.sample[i]==0.0) ? DBL_MIN : other.sample[i];
+   for (size_t i=0; i<samples.size(); i++)
+      samples[i] /= (other.samples[i]==0.0) ? DBL_MIN : other.samples[i];
 
    return *this;
 }
@@ -82,7 +82,7 @@ NICE::WF& NICE::WF::operator/=(const WF& other)
 
 NICE::WF& NICE::WF::operator+=(double value)
 {
-   for (size_t i=0; i<sample.size(); i++) sample[i] += value;
+   for (size_t i=0; i<samples.size(); i++) samples[i] += value;
 
    return *this;
 }
@@ -91,7 +91,7 @@ NICE::WF& NICE::WF::operator+=(double value)
 
 NICE::WF& NICE::WF::operator*=(double value)
 {
-   for (size_t i=0; i<sample.size(); i++) sample[i] *= value;
+   for (size_t i=0; i<samples.size(); i++) samples[i] *= value;
 
    return *this;
 }

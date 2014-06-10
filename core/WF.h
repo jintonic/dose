@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "PMT.h"
+#include "Pulse.h"
 
 namespace NICE { class WF; }
 
@@ -24,10 +25,25 @@ class NICE::WF : public PMT
        * Pedestal
        */
       double ped; // pedestal
+      /**
+       * RMS of pedestal
+       */
+      double prms; // RMS of pedestal
+      /**
+       * Trigger time
+       */
+      double ttrg; // trigger time
 
-      std::vector<double> sample;
+      /**
+       * Waveform samples
+       */
+      std::vector<double> samples; // waveform samples
+      /**
+       * Array of pulses
+       */
+      std::vector<Pulse> pulses; // array of pulses
 
-      WF(): PMT(), type(kRaw), freq(0), ped(0) {};
+      WF(): PMT(), type(kRaw), freq(0), ped(0), prms(0), ttrg(0) {};
       virtual ~WF() {};
 
       bool IsSimilarTo(const WF& other) const;
