@@ -164,7 +164,8 @@ void Reader::ReadEvent(int i)
          Warning("ReadEvent", "ch. %d >= %d (max), skipped", channel, nch);
          continue;
       }
-      WF* wf = (WF*) At(channel);
+      WF* wf = (WF*) wfs.At(channel);
+      wf->samples.resize(0);
 
       // decode waveform data
       unsigned int *data = (unsigned int*) (ptr);
@@ -224,7 +225,7 @@ void Reader::ReadEvent(int i)
          } else { // skip the rest samples if nZippedSamples!=0 or 3
             Warning("ReadEvent",
                   "number of zipped samples in PMT %d = %d, skip the rest.",
-                  wf->id, nZippedSamples);
+                  wf->pmt.id, nZippedSamples);
             break;
          }
       }
@@ -237,9 +238,9 @@ void Reader::ReadEvent(int i)
       if (nSamples!=nmax) {
          Warning("ReadEvent",
                "number of samples in PMT %2d (ch.%d) is %zu,",
-               wf->id, channel, nSamples);
+               wf->pmt.id, channel, nSamples);
          Warning("ReadEvent",
-               "while total number of samples is %zu", nmax);
+               "while total number of samples is %d", nmax);
       }
       // update end of last pulse
       if (wf->pulses.back().end==wf->pulses.back().bgn)
