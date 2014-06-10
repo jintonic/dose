@@ -64,7 +64,11 @@ class NICE::WFs : public TClonesArray
       int thr; // threshold for software 0-suppression
 
    public:
-      WFs(int run=999999) : TClonesArray("NICE::WF", 8), run(run) { nch=fSize; }
+      WFs(int run=999999) :
+         TClonesArray("NICE::WF", 8),
+         run(run), sub(-1), evt(-1), cnt(-1), sec(-1), nmax(0), 
+         nfw(0), nbw(0), thr(0) { nch=fSize; }
+
       virtual ~WFs() {};
 
       void Initialize(const char *db="/path/to/pmt");
