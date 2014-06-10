@@ -90,6 +90,9 @@ class NICE::WFs : public TObject
 
       void Initialize(const char *db="/path/to/pmt");
 
+      WF* At(unsigned short i) const;
+      WF* operator[](unsigned short i) const { return At(i); }
+
       ClassDef(WFs,1);
 };
 
