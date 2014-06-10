@@ -1,8 +1,9 @@
 #include "Logger.h"
+using namespace NICE;
 
-int NICE::Logger::gVerbosity = 0;
+int Logger::gVerbosity = 0;
 
-int NICE::Logger::GetVerbosity()
+int Logger::GetVerbosity()
 {
    if (verbosity<=0) return gVerbosity;
    else return verbosity;
