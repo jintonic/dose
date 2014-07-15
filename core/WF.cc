@@ -6,8 +6,7 @@ using namespace NICE;
 
 bool WF::IsSimilarTo(const WF& other) const
 {
-   bool similar = samples.size()==other.samples.size() && 
-      freq==other.freq && type==other.type;
+   bool similar = smpl.size()==other.smpl.size() && freq==other.freq;
 
    return similar;
 }
@@ -16,22 +15,21 @@ bool WF::IsSimilarTo(const WF& other) const
 
 void WF::MakeSimilarTo(const WF& other)
 {
-   samples.resize(other.samples.size());
+   smpl.resize(other.smpl.size());
    freq = other.freq;
-   type = other.type;
 }
 
 //------------------------------------------------------------------------------
 
 WF& WF::operator+=(const WF& other)
 {
-   if (IsSimilarTo(other)==kFALSE) {
+   if (IsSimilarTo(other)==false) {
       Warning("operator+=", 
             "Only similar waveforms can be added together! Do nothing.");
       return *this;
    }
 
-   for (size_t i=0; i<samples.size(); i++) samples[i] += other.samples[i];
+   for (size_t i=0; i<smpl.size(); i++) smpl[i] += other.smpl[i];
 
    return *this;
 }
@@ -40,13 +38,13 @@ WF& WF::operator+=(const WF& other)
 
 WF& WF::operator-=(const WF& other)
 {
-   if (IsSimilarTo(other)==kFALSE) {
+   if (IsSimilarTo(other)==false) {
       Warning("operator-=", 
             "Only a similar waveform can be subtracted! Do nothing.");
       return *this;
    }
 
-   for (size_t i=0; i<samples.size(); i++) samples[i] -= other.samples[i];
+   for (size_t i=0; i<smpl.size(); i++) smpl[i] -= other.smpl[i];
 
    return *this;
 }
@@ -55,13 +53,13 @@ WF& WF::operator-=(const WF& other)
 
 WF& WF::operator*=(const WF& other)
 {
-   if (IsSimilarTo(other)==kFALSE) {
+   if (IsSimilarTo(other)==false) {
       Warning("operator*=", 
             "Only similar waveforms can be multiplied! Do nothing.");
       return *this;
    }
 
-   for (size_t i=0; i<samples.size(); i++) samples[i] *= other.samples[i];
+   for (size_t i=0; i<smpl.size(); i++) smpl[i] *= other.smpl[i];
 
    return *this;
 }
@@ -74,8 +72,8 @@ WF& WF::operator/=(const WF& other)
       return *this;
    }
 
-   for (size_t i=0; i<samples.size(); i++)
-      samples[i] /= (other.samples[i]==0.0) ? DBL_MIN : other.samples[i];
+   for (size_t i=0; i<smpl.size(); i++)
+      smpl[i] /= (other.smpl[i]==0.0) ? DBL_MIN : other.smpl[i];
 
    return *this;
 }
@@ -84,7 +82,7 @@ WF& WF::operator/=(const WF& other)
 
 WF& WF::operator+=(double value)
 {
-   for (size_t i=0; i<samples.size(); i++) samples[i] += value;
+   for (size_t i=0; i<smpl.size(); i++) smpl[i] += value;
 
    return *this;
 }
@@ -93,7 +91,7 @@ WF& WF::operator+=(double value)
 
 WF& WF::operator*=(double value)
 {
-   for (size_t i=0; i<samples.size(); i++) samples[i] *= value;
+   for (size_t i=0; i<smpl.size(); i++) smpl[i] *= value;
 
    return *this;
 }
@@ -112,3 +110,10 @@ WF& WF::operator/=(double value)
 
 //------------------------------------------------------------------------------
 
+void WF::Reset()
+{
+   ResetBit(kCalibrated);
+   freq=0; ped=0; prms=0; ctrg=0;
+   ns=0; smpl.resize(0);
+   np=0; pls.resize(0);
+}

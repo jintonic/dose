@@ -82,7 +82,7 @@ class NICE::WFs : public TObject
       /**
        * Waveform array
        */
-      TClonesArray wfs; // waveform array
+      TClonesArray wf; // waveform array
 
    public:
       WFs(int run=999999);

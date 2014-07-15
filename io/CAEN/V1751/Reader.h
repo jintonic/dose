@@ -69,6 +69,21 @@ class Reader: public NICE::WFs, public NICE::Logger
 
       void ReadRunInfo(int i);
       void ReadEvent(int i);
+      void ReadWF(unsigned short ch, unsigned int *data);
+      /**
+       * Software zero-suppression
+       */
+      void Suppress(unsigned short ch, unsigned short threshold=3);
+      /**
+       * Convert ADC counts to number of photoelectrons.
+       * The following operations are done here:
+       * - calculate pedestal using the first @param nSamples
+       * - overwrite integer pedestal given by hardware
+       * - remove pedestal
+       * - flip waveform if it is negative
+       * - ADC to npe
+       */
+      void Calibrate(unsigned short ch, unsigned short nSamples);
 };
 
 #endif

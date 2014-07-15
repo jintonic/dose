@@ -17,7 +17,7 @@ using namespace NICE;
 WFs::WFs(int run) : TObject(), run(run), sub(-1), evt(-1), cnt(0), sec(0),
    nch(8), nmax(0), nfw(0), nbw(0), thr(0)
 {
-   wfs.SetClass("NICE::WF",nch);
+   wf.SetClass("NICE::WF",nch);
 }
 
 //------------------------------------------------------------------------------
@@ -55,14 +55,14 @@ void WFs::Initialize(const char* db)
          continue;
       }
 
-      WF *wf = Map(atoi(ch[i]->d_name));
-      if (wf) {
-         if (wf->pmt.id>=0) {
-            LoadTimeOffset(wf);
-            LoadMeanOf1PE(wf);
-            LoadStatus(wf);
+      WF *aWF = Map(atoi(ch[i]->d_name));
+      if (aWF) {
+         if (aWF->pmt.id>=0) {
+            LoadTimeOffset(aWF);
+            LoadMeanOf1PE(aWF);
+            LoadStatus(aWF);
          }
-         wf->pmt.Dump();
+         aWF->pmt.Dump();
       }
 
       free(ch[i]);
@@ -87,39 +87,39 @@ WF* WFs::Map(int ch)
       return 0;
    }
 
-   WF *wf = 0;
+   WF *aWF = 0;
    Int_t runnum, id;
    while (file>>runnum>>id) {
       if (run<runnum) continue;
-      wf = (WF*) wfs.ConstructedAt(ch);
+      aWF = (WF*) wf.ConstructedAt(ch);
       break;
    }
 
    file.close();
 
-   if (!wf) {
+   if (!aWF) {
       Error("Map", "no PMT mapped to ch %d in run %d", ch, run);
       Error("Map", "return 0");
       return 0;
    }
 
-   wf->pmt.ch = ch;
-   wf->pmt.id = id;
-   return wf;
+   aWF->pmt.ch = ch;
+   aWF->pmt.id = id;
+   return aWF;
 }
 
 //------------------------------------------------------------------------------
 
-void WFs::LoadTimeOffset(WF* wf)
+void WFs::LoadTimeOffset(WF* aWF)
 {
-   if (!wf) {
+   if (!aWF) {
       Error("LoadTimeOffset", "NULL pointer to PMT, return");
       return;
    }
 
-   ifstream file(Form("%s/%d/dt.txt", fDB.Data(), wf->pmt.ch), ios::in);
+   ifstream file(Form("%s/%d/dt.txt", fDB.Data(), aWF->pmt.ch), ios::in);
    if (!(file.is_open())) {
-      Error("LoadTimeOffset", "cannot read %s/%d/dt.txt", fDB.Data(), wf->pmt.ch);
+      Error("LoadTimeOffset", "cannot read %s/%d/dt.txt", fDB.Data(), aWF->pmt.ch);
       Error("LoadTimeOffset", "return");
       return;
    }
@@ -128,7 +128,7 @@ void WFs::LoadTimeOffset(WF* wf)
    double dt;
    while (file>>runnum>>dt) {
       if (run<runnum) continue;
-      wf->pmt.dt = dt*ns;
+      aWF->pmt.dt = dt*ns;
       break;
    }
 
@@ -137,16 +137,16 @@ void WFs::LoadTimeOffset(WF* wf)
 
 //------------------------------------------------------------------------------
 
-void WFs::LoadMeanOf1PE(WF* wf)
+void WFs::LoadMeanOf1PE(WF* aWF)
 {
-   if (!wf) {
+   if (!aWF) {
       Error("LoadMeanOf1PE", "NULL pointer to PMT, return");
       return;
    }
 
-   ifstream file(Form("%s/%d/gain.txt", fDB.Data(), wf->pmt.ch), ios::in);
+   ifstream file(Form("%s/%d/gain.txt", fDB.Data(), aWF->pmt.ch), ios::in);
    if (!(file.is_open())) {
-      Error("LoadMeanOf1PE", "cannot read %s/%d/gain.txt", fDB.Data(), wf->pmt.ch);
+      Error("LoadMeanOf1PE", "cannot read %s/%d/gain.txt", fDB.Data(), aWF->pmt.ch);
       Error("LoadMeanOf1PE", "return");
       return;
    }
@@ -155,7 +155,7 @@ void WFs::LoadMeanOf1PE(WF* wf)
    double gain;
    while (file>>runnum>>gain) {
       if (run<runnum) continue;
-      wf->pmt.gain = gain;
+      aWF->pmt.gain = gain;
       break;
    }
 
@@ -164,16 +164,16 @@ void WFs::LoadMeanOf1PE(WF* wf)
 
 //------------------------------------------------------------------------------
 
-void WFs::LoadStatus(WF* wf)
+void WFs::LoadStatus(WF* aWF)
 {
-   if (!wf) {
+   if (!aWF) {
       Error("LoadStatus", "NULL pointer to PMT, return");
       return;
    }
 
-   ifstream file(Form("%s/%d/status.txt", fDB.Data(), wf->pmt.ch), ios::in);
+   ifstream file(Form("%s/%d/status.txt", fDB.Data(), aWF->pmt.ch), ios::in);
    if (!(file.is_open())) {
-      Error("LoadStatus", "cannot read %s/%d/status.txt", fDB.Data(), wf->pmt.ch);
+      Error("LoadStatus", "cannot read %s/%d/status.txt", fDB.Data(), aWF->pmt.ch);
       Error("LoadStatus", "return");
       return;
    }
@@ -182,7 +182,7 @@ void WFs::LoadStatus(WF* wf)
    TString st;
    while (file>>runnum>>st) {
       if (run<runnum) continue;
-      wf->pmt.SetStatus(st);
+      aWF->pmt.SetStatus(st);
       break;
    }
 
@@ -193,12 +193,12 @@ void WFs::LoadStatus(WF* wf)
 
 WF* WFs::At(unsigned short i) const
 {
-   if (i>=wfs.GetEntries()) {
+   if (i>=wf.GetEntries()) {
       Warning("operator[]", 
-            "index %d >= %d (max), return 0", i, wfs.GetEntries());
+            "index %d >= %d (max), return 0", i, wf.GetEntries());
       return 0;
    }
-   return (WF*) wfs.At(i);
+   return (WF*) wf.At(i);
 }
 
 //------------------------------------------------------------------------------

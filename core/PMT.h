@@ -29,8 +29,8 @@ class NICE::PMT: public TObject
        * loaded from $NICESYS/pmt/?/mapping.txt in WFs::Initialize()
        * - id >= 0: normal PMT
        * - id == -1: empty channel
-       * - id == -10: TRG input
-       * - id == -20: LED input
+       * - id == -10: coincidence
+       * - id == -20: clock
        */
       short id; // PMT id
       /**

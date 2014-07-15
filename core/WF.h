@@ -20,11 +20,9 @@ namespace NICE { class WF; }
 class NICE::WF : public TObject
 {
    public:
-      enum Type {
-         kCalibrated,
-         kRaw,
+      enum {
+         kCalibrated = BIT(14),
       };
-      Type type; 
 
       /**
        * Sampling frequency
@@ -46,18 +44,26 @@ class NICE::WF : public TObject
       /**
        * Waveform samples
        */
-      std::vector<double> samples; // waveform samples
+      std::vector<double> smpl; // waveform samples
+      /**
+       * Number of waveform samples
+       */
+      unsigned short ns; // number of samples
       /**
        * Array of pulses
        */
-      std::vector<Pulse> pulses; // array of pulses
+      std::vector<Pulse> pls; // array of pulses
+      /**
+       * Number of pulses
+       */
+      unsigned short np; // number of pulses
 
       /**
        * Information of related PMT
        */
       PMT pmt; // information of related PMT
 
-      WF(): type(kRaw), freq(0), ped(0), prms(0), ctrg(0) {};
+      WF(): freq(0), ped(0), prms(0), ctrg(0), ns(0), np(0) {};
       virtual ~WF() {};
 
       bool IsSimilarTo(const WF& other) const;
@@ -72,6 +78,8 @@ class NICE::WF : public TObject
       WF& operator-=(double value) { return (*this) += -value; }
       WF& operator*=(double value); 
       WF& operator/=(double value);
+
+      void Reset();
 
       ClassDef(WF,1);
 };

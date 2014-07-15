@@ -36,8 +36,8 @@ void PMT::Dump() const
    if (id>=0) Info("Dump", "ch %2d: PMT %2d (gain =%4.1f, dt =%6.1f*ns, %s)", 
          ch, id, gain, dt/ns, GetStatus());
    else if (id==-1) Info("Dump", "ch %2d: empty", ch);
-   else if (id==-10) Info("Dump", "ch %2d: TRG input", ch);
-   else if (id==-20) Info("Dump", "ch %2d: LED input", ch);
+   else if (id==-10) Info("Dump", "ch %2d: coincidence", ch);
+   else if (id==-20) Info("Dump", "ch %2d: clock", ch);
    else Info("Dump", "ch %2d: unknown", ch);
 }
 
