@@ -73,7 +73,7 @@ class Reader: public NICE::WFs, public NICE::Logger
       /**
        * Software zero-suppression
        */
-      void Suppress(unsigned short ch, unsigned short threshold=3);
+      void Suppress(unsigned short ch);
       /**
        * Convert ADC counts to number of photoelectrons.
        * The following operations are done here:
