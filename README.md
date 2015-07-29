@@ -1,1 +1,1 @@
-NICE - NaI Cooled Experiment
+NICE - NaI/CsI Cryogenic Experiment
