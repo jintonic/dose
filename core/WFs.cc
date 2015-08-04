@@ -14,12 +14,6 @@ using namespace UNIC;
 #include "WFs.h"
 using namespace NICE;
 
-WFs::WFs(int run) : TObject(), run(run), sub(-1), evt(-1), cnt(0), sec(0),
-   nch(8), nmax(0), nfw(0), nbw(0), thr(0)
-{
-   wf.SetClass("NICE::WF",nch);
-}
-
 //------------------------------------------------------------------------------
 
 void WFs::Initialize(const char* db)
@@ -49,6 +43,8 @@ void WFs::Initialize(const char* db)
       Warning("Initialize", "return");
       return;
    }
+
+   wf.SetClass("NICE::WF",nch);
    for (Int_t i=0; i<n; i++) {
       if (ch[i]->d_name[0]=='.' || i>=nch+2) {
          free(ch[i]);
