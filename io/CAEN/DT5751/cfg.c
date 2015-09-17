@@ -81,7 +81,26 @@ int ParseConfigFile(FILE *fcfg, RUN_CFG_t *cfg)
       continue;
     }
 
-    // Channel Auto trigger (DISABLED, ACQUISITION_ONLY, ACQUISITION_AND_TRGOUT)
+    // Global trigger mode
+    if (strstr(str, "TRIGGER_MODE")!=NULL) {
+      TRG_MODE_t tm;
+      read = fscanf(fcfg, "%s", str1);
+      if (strcmp(str1, "SOFTWARE")==0)
+	tm = SOFTWARE_TRG;
+      else if (strcmp(str1, "INTERNAL")==0)
+	tm = INTERNAL_TRG;
+      else if (strcmp(str1, "EXTERNAL_NIM")==0)
+	tm = EXTERNAL_NIM;
+      else if (strcmp(str1, "EXTERNAL_TTL")==0)
+	tm = EXTERNAL_TTL;
+      else {
+	printf("%s: Invalid Parameter\n", str);
+	continue;
+      }
+      cfg->trg = tm;
+    }
+
+    // Channel trigger mode 
     if (strstr(str, "CHANNEL_TRIGGER")!=NULL) {
       CAEN_DGTZ_TriggerMode_t tm;
       read = fscanf(fcfg, "%s", str1);
@@ -89,8 +108,10 @@ int ParseConfigFile(FILE *fcfg, RUN_CFG_t *cfg)
 	tm = CAEN_DGTZ_TRGMODE_DISABLED;
       else if (strcmp(str1, "ACQUISITION_ONLY")==0)
 	tm = CAEN_DGTZ_TRGMODE_ACQ_ONLY;
-      else if (strcmp(str1, "ACQUISITION_AND_TRGOUT")==0)
+      else if (strcmp(str1, "ACQ_AND_EXTOUT")==0)
 	tm = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
+      else if (strcmp(str1, "EXTOUT_ONLY")==0)
+	tm = CAEN_DGTZ_TRGMODE_EXTOUT_ONLY;
       else {
 	printf("%s: Invalid Parameter\n", str);
 	continue;
