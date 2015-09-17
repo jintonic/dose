@@ -113,7 +113,7 @@ WF& WF::operator/=(double value)
 void WF::Reset()
 {
    ResetBit(kCalibrated);
-   freq=0; ped=0; prms=0; ctrg=0;
+   freq=0; ped=0; prms=0; ctrg=0; npe=0;
    ns=0; smpl.resize(0);
    np=0; pls.resize(0);
 }
