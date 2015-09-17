@@ -57,13 +57,17 @@ class NICE::WF : public TObject
        * Number of pulses
        */
       unsigned short np; // number of pulses
+      /**
+       * Total number of photoelectrons
+       */
+      double npe; // total number of photoelectrons
 
       /**
        * Information of related PMT
        */
       PMT pmt; // information of related PMT
 
-      WF(): freq(0), ped(0), prms(0), ctrg(0), ns(0), np(0) {};
+      WF(): freq(0), ped(0), prms(0), ctrg(0), ns(0), np(0), npe(0) {};
       virtual ~WF() {};
 
       bool IsSimilarTo(const WF& other) const;
@@ -81,7 +85,7 @@ class NICE::WF : public TObject
 
       void Reset();
 
-      ClassDef(WF,1);
+      ClassDef(WF,2);
 };
 
 #endif
