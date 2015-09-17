@@ -141,7 +141,7 @@ void Reader::ReadRunCfg(int i)
    nmax=cfg.ns;
    nfw=100; // set fw smpl not to be suppressed
    nbw=100; // set bw smpl not to be suppressed
-   thr=3;   // set threshold for software zero suppression
+   thr=3;   // set threshold for software pulse scanning
 }
 
 //______________________________________________________________________________
@@ -183,6 +183,22 @@ void Reader::ReadWF(unsigned short ch, uint16_t *data)
 
 void Reader::Suppress(unsigned short ch)
 { 
+   Scan(ch); // scan pulses in a waveform
+   WF* wf = At(ch); // must have been filled
+   if (wf->pmt.id==-1) return; // skip empty channels
+   // suppress samples in between pulses
+   for (int i=0; i<=wf->np; i++) {
+      int end=0, bgn=nmax;
+      if (i!=0) end=wf->pls[i-1].end;
+      if (i!=wf->np) bgn=wf->pls[i].bgn;
+      for (int j=end/*prev end*/; j<bgn/*new bgn*/; j++) wf->smpl[j]=0;
+   }
+}
+
+//------------------------------------------------------------------------------
+
+void Reader::Scan(unsigned short ch)
+{ 
    WF* wf = At(ch); // must have been filled
    if (wf->pmt.id==-1) return; // skip empty channels
    if (wf->smpl.size()<96) return; // samples not enough
@@ -219,9 +235,7 @@ void Reader::Suppress(unsigned short ch)
          pls.bgn=i-nbw;
          wf->pls.push_back(pls);
 
-         // 0-suppress samples between pulses
          bgn=i-nbw;
-         for (int j=end/*prev end*/; j<bgn/*new bgn*/; j++) wf->smpl[j]=0;
          isPed=false; // flip flag
       } else { // below threshold
          if (isPed) continue; // previous samples also below threshold
@@ -245,9 +259,6 @@ void Reader::Suppress(unsigned short ch)
    }
    if (end!=bgn) wf->pls.back().end=end;
    wf->np = wf->pls.size();
- 
-   // 0-suppress samples from the last pulse to the end of waveform
-   for (int j=end; j<nmax; j++) wf->smpl[j]=0;
 }
 
 //------------------------------------------------------------------------------
@@ -305,9 +316,11 @@ void Reader::Calibrate(unsigned short ch, unsigned short nSamples)
    wf->prms = sqrt(ped2 - wf->ped*wf->ped);
 
    // remove pedestal, flip waveform, ADC to npe
+   double integral=0;
    for (int i=0; i<nmax; i++) {
       wf->smpl[i] = (wf->ped - wf->smpl[i])/wf->pmt.gain;
+      integral+=wf->smpl[i];
    }
-
+   wf->npe=integral;
    wf->SetBit(WF::kCalibrated);
 }
