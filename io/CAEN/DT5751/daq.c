@@ -48,12 +48,20 @@ int main(int argc, char* argv[])
   err |= CAEN_DGTZ_Reset(dt5751);
   err |= CAEN_DGTZ_SetRecordLength(dt5751,cfg.ns);
   err |= CAEN_DGTZ_SetPostTriggerSize(dt5751,cfg.post);
-  err |= CAEN_DGTZ_SetSWTriggerMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
   err |= CAEN_DGTZ_SetMaxNumEventsBLT(dt5751,1024); // maximized
   err |= CAEN_DGTZ_SetAcquisitionMode(dt5751,CAEN_DGTZ_SW_CONTROLLED);
   err |= CAEN_DGTZ_SetChannelEnableMask(dt5751,cfg.mask);
-  err |= CAEN_DGTZ_SetChannelSelfTrigger(
-      dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY,cfg.mask);
+  if (cfg.trg==EXTERNAL_TTL) {
+    err |= CAEN_DGTZ_SetExtTriggerInputMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
+    err |= CAEN_DGTZ_SetIOLevel(dt5751,CAEN_DGTZ_IOLevel_TTL);
+  } else if (cfg.trg==EXTERNAL_NIM) {
+    err |= CAEN_DGTZ_SetExtTriggerInputMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
+    err |= CAEN_DGTZ_SetIOLevel(dt5751,CAEN_DGTZ_IOLevel_NIM);
+  } else if (cfg.trg==SOFTWARE_TRG)
+    err |= CAEN_DGTZ_SetSWTriggerMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
+  else
+    err |= CAEN_DGTZ_SetChannelSelfTrigger(
+	dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY,cfg.mask);
   // configure individual channels
   int ich /* channel index */, Non=0 /* number of channels turned on */;
   for (ich=0; ich<Nch; ich++) {
@@ -119,6 +127,9 @@ int main(int argc, char* argv[])
   if (argc==4) nNeeded=atoi(argv[3]);
   uint32_t bsize, fsize=0;
   while (nEvtTot<nNeeded && !interrupted) {
+    // send software trigger to the board
+    if (cfg.trg==SOFTWARE_TRG) CAEN_DGTZ_SendSWtrigger(dt5751);
+
     // read data from board
     CAEN_DGTZ_ReadMode_t rMode=CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT;
     err = CAEN_DGTZ_ReadData(dt5751,rMode,buffer,&bsize);
