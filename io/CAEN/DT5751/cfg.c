@@ -98,6 +98,7 @@ int ParseConfigFile(FILE *fcfg, RUN_CFG_t *cfg)
 	continue;
       }
       cfg->trg = tm;
+      continue;
     }
 
     // Channel trigger mode 
