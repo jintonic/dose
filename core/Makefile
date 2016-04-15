@@ -99,7 +99,7 @@ DEPENDS = $(shell symbols=$(SYMBOLS); \
 	  done | sort -u | tr '\n' ' ')
 
 RLIBMAP = rlibmap
-
+ROOTCLING = rootcling
 
 # Action starts
 # =============
@@ -132,7 +132,13 @@ endif
 $(ROOTMAP): $(LIBRARY)
 	@echo
 	@echo "* Creating rootmap file:"
-	$(RLIBMAP) -o $(ROOTMAP) -l $(LIBRARY) -d $(DEPENDS) -c $(LINKDEF)
+	#version check
+        @if [ $(VERSION) -ge 6 ]; then \
+                $(ROOTCLING)   -f $(ROOTMAP) -rmf $(LIBRARY) -rml $(DEPENDS)  $(LINKDEF); \
+        else \
+                $(RLIBMAP) -o $(ROOTMAP) -l $(LIBRARY) -d $(DEPENDS)  $(LINKDEF); \
+        fi
+
 
 # lib$(LIBNAME).so depends on all *.o files.
 #  The flag "-shared" is used to create shared libs
