@@ -83,6 +83,8 @@ class NICE::WF : public TObject
       WF& operator*=(double value); 
       WF& operator/=(double value);
 
+      double GetIntegral(short start, short end); ///< Integrate in [start, end)
+
       void Reset();
 
       ClassDef(WF,2);
