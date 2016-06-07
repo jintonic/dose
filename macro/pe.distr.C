@@ -1,6 +1,6 @@
 using namespace NICE;
-// generate PE distribution
-void pe(const char *file="~Jing.Liu/data/nice/000000/run_000069.000001.root")
+// generate single PE distribution
+void gain(const char *file="~Jing.Liu/data/nice/000000/run_000069.000001.root")
 {
    // input
    TChain *t = new TChain("t");
