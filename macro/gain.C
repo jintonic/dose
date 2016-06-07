@@ -9,7 +9,7 @@ void gain(const char *file="~Jing.Liu/data/nice/000000/run_000069.000001.root")
    t->SetBranchAddress("evt",&wf);
 
    // output
-   TFile *f = new TFile("pe.root","recreate");
+   TFile *f = new TFile("singlePE.root","recreate");
    TH1D *h = new TH1D("h", ";area [ADC counts];Entries/(1 ADC counts)", 350,-100,250);
 
    // main loop
