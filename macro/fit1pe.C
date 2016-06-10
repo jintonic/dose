@@ -4,11 +4,12 @@ void fit1pe(const char *input="singlePE.root")
    TH1D *h = (TH1D*) file->Get("h");
 
    TF1 *f = new TF1("f", "gaus(0) + [3]*exp(-(x-[4])*(x-[4])/2/[5]/[5]) + [6]*exp(-(x-2*[4])*(x-2*[4])/2/[5]/[5])", -100,250);
-   f->SetParNames("n0", "mean0", "sigma0", "n1", "mean", "sigma", "n2");
+   f->SetParNames("norm0", "mean0", "sigma0", "norm1", "mean", "sigma", "norm2");
    f->SetParameters(3118,-3.5,14, 166,55,30, 10);
 
    gStyle->SetOptFit(1);
-   gStyle->SetStatH(0.15);
+   gStyle->SetOptStat(10);
+   gStyle->SetStatH(0.12);
    TCanvas *c = new TCanvas;
    c->SetLogy();
 
