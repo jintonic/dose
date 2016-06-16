@@ -131,6 +131,17 @@ double WF::GetIntegral(short start, short end)
 
 //------------------------------------------------------------------------------
 
+Pulse* WF::GetPulse(unsigned short idx)
+{
+   if (idx>=np) {
+      Warning("GetPulse", "idx %d >= total # of pulses %d, return 0", idx, np);
+      return 0;
+   }
+   return &(pls.at(idx));
+}
+
+//------------------------------------------------------------------------------
+
 void WF::Reset()
 {
    ResetBit(kCalibrated);
