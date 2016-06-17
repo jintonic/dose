@@ -71,6 +71,10 @@ class Reader: public NICE::WFs, public NICE::Logger
       void ReadEvent(int i);
       void ReadWF(unsigned short ch, unsigned int *data);
       /**
+       * Scan pulses in a waveform
+       */
+      void Scan(unsigned short ch);
+      /**
        * Software zero-suppression
        */
       void Suppress(unsigned short ch);
