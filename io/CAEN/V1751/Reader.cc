@@ -281,6 +281,7 @@ void Reader::Scan(unsigned short ch)
 
    // calculate pedestal; ADC -> npe
    if (run<5) Calibrate(ch, 30);
+   else if (run>79 && run<96) Calibrate(ch, 20);
    else Calibrate(ch, 96);
 
    // reset pulses defined by hardware 0-suppression
