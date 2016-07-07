@@ -98,7 +98,16 @@ DEPENDS = $(shell symbols=$(SYMBOLS); \
 	  echo $$so;\
 	  done | sort -u | tr '\n' ' ')
 
-RLIBMAP = rlibmap
+
+# attempt to make it work for both ROOT 5 and 6
+# ==================================================
+
+ROOTVERSION = $(firstword $(subst ., ,$(shell $(ROOTCONFIG) --version)))
+ifeq ($(ROOTVERSION), 6)
+  CREATEMAP = rootcling -f $@ -rmf $^ -rml $(DEPENDS) $(LINKDEF)
+else
+  CREATEMAP = rlibmap -o $@ -l $^ -d $(DEPENDS) -c $(LINKDEF)
+endif
 
 
 # Action starts
@@ -125,14 +134,14 @@ endif
 	  sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	  rm -f $@.$$$$ 
 
-# lib$(LIBNAME).rootmap can only be created after the creation of lib$(LIBNAME).so. It
-# tells ROOT the dependence among libraries. Putting it along with the
-# corresponding library allows one to use in CINT the functions defined in the
-# library without calling gSystem->Load("lib.so")
+# lib$(LIBNAME).rootmap can only be created after the creation of
+# lib$(LIBNAME).so. It tells ROOT the dependence among libraries. Putting it
+# along with the corresponding library allows one to use in CINT the functions
+# defined in the library without calling gSystem->Load("lib.so")
 $(ROOTMAP): $(LIBRARY)
 	@echo
 	@echo "* Creating rootmap file:"
-	$(RLIBMAP) -o $(ROOTMAP) -l $(LIBRARY) -d $(DEPENDS) -c $(LINKDEF)
+	$(CREATEMAP)
 
 # lib$(LIBNAME).so depends on all *.o files.
 #  The flag "-shared" is used to create shared libs
@@ -181,34 +190,34 @@ install: $(ROOTMAP)
 	@echo -n "checking if $(PREFIX) exists..."
 	@if [ -d $(PREFIX) ]; then \
 	  echo "yes."; \
-	else \
+	  else \
 	  echo "no."; \
 	  echo "mkdir $(PREFIX)..."; \
 	  mkdir $(PREFIX); \
-	fi
+	  fi
 	@echo -n "copying lib$(LIBNAME).so to $(PREFIX)/lib..."
 	@if [ -d $(PREFIX)/lib ]; then \
 	  cp lib$(LIBNAME).so $(PREFIX)/lib; \
 	  cp lib$(LIBNAME).rootmap $(PREFIX)/lib; \
-	else \
+	  else \
 	  mkdir $(PREFIX)/lib; \
 	  cp lib$(LIBNAME).so $(PREFIX)/lib; \
 	  cp lib$(LIBNAME).rootmap $(PREFIX)/lib; \
-	fi; 
+	  fi; 
 	@echo "done."; 
 	@echo -n "copying *.h to $(PREFIX)/include/$(LIBNAME)..."
 	@if [ -d $(PREFIX)/include ]; then \
 	  if [ -d $(PREFIX)/include/$(LIBNAME) ]; then \
-	    cp $(HEADERS) $(PREFIX)/include/$(LIBNAME); \
+	  cp $(HEADERS) $(PREFIX)/include/$(LIBNAME); \
 	  else \
-	    mkdir $(PREFIX)/include/$(LIBNAME); \
-	    cp $(HEADERS) $(PREFIX)/include/$(LIBNAME); \
+	  mkdir $(PREFIX)/include/$(LIBNAME); \
+	  cp $(HEADERS) $(PREFIX)/include/$(LIBNAME); \
 	  fi; \
-	else \
+	  else \
 	  mkdir $(PREFIX)/include; \
 	  mkdir -p $(PREFIX)/include/$(LIBNAME); \
 	  cp *.h $(PREFIX)/include/$(LIBNAME); \
-	fi
+	  fi
 	@echo "done."
 
 uninstall:

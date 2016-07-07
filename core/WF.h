@@ -83,6 +83,10 @@ class NICE::WF : public TObject
       WF& operator*=(double value); 
       WF& operator/=(double value);
 
+      double GetIntegral(short start, short end); ///< Integrate in [start, end)
+
+      Pulse* GetPulse(unsigned short idx=0); // Get the idx pulse
+
       void Reset();
 
       ClassDef(WF,2);

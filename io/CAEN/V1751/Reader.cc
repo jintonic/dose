@@ -259,12 +259,29 @@ void Reader::ReadWF(unsigned short ch, unsigned int *data)
 
 void Reader::Suppress(unsigned short ch)
 { 
+   Scan(ch); // scan pulses in a waveform
+   WF* wf = At(ch); // must have been filled
+   if (wf->pmt.id==-1) return; // skip empty channels
+   // suppress samples in between pulses
+   for (int i=0; i<=wf->np; i++) {
+      int end=0, bgn=nmax;
+      if (i!=0) end=wf->pls[i-1].end;
+      if (i!=wf->np) bgn=wf->pls[i].bgn;
+      for (int j=end/*prev end*/; j<bgn/*new bgn*/; j++) wf->smpl[j]=0;
+   }
+}
+
+//------------------------------------------------------------------------------
+
+void Reader::Scan(unsigned short ch)
+{ 
    WF* wf = At(ch); // must have been filled
    if (wf->pmt.id==-1) return; // skip empty channels
    if (wf->np==0) return; // nothing to suppress
 
    // calculate pedestal; ADC -> npe
    if (run<5) Calibrate(ch, 30);
+   else if (run>79 && run<96) Calibrate(ch, 20);
    else Calibrate(ch, 96);
 
    // reset pulses defined by hardware 0-suppression
@@ -300,9 +317,7 @@ void Reader::Suppress(unsigned short ch)
          pls.bgn=i-nbw;
          wf->pls.push_back(pls);
 
-         // 0-suppress samples between pulses
          bgn=i-nbw;
-         for (int j=end/*prev end*/; j<bgn/*new bgn*/; j++) wf->smpl[j]=0;
          isPed=false; // flip flag
       } else { // below threshold
          if (isPed) continue; // previous samples also below threshold
@@ -326,9 +341,6 @@ void Reader::Suppress(unsigned short ch)
    }
    if (end!=bgn) wf->pls.back().end=end;
    wf->np = wf->pls.size();
- 
-   // 0-suppress samples from the last pulse to the end of waveform
-   for (int j=end; j<nmax; j++) wf->smpl[j]=0;
 }
 
 //------------------------------------------------------------------------------

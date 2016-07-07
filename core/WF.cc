@@ -110,6 +110,38 @@ WF& WF::operator/=(double value)
 
 //------------------------------------------------------------------------------
 
+double WF::GetIntegral(short start, short end)
+{
+   if (start<0) {
+      Warning("GetIntegral", "start point must >= 0.");
+      start=0;
+   }
+   if (end>=ns) {
+      Warning("GetIntegral", "end point exceeds the total number of samples.");
+      end=ns;
+   }
+   if (start>=end) {
+      Warning("GetIntegral", "start point must be smaller than end points.");
+      return 0;
+   }
+   double integral=0;
+   for (short i=start ; i<end; i++) { integral+=smpl[i]; }
+   return integral;
+}
+
+//------------------------------------------------------------------------------
+
+Pulse* WF::GetPulse(unsigned short idx)
+{
+   if (idx>=np) {
+      Warning("GetPulse", "idx %d >= total # of pulses %d, return 0", idx, np);
+      return 0;
+   }
+   return &(pls.at(idx));
+}
+
+//------------------------------------------------------------------------------
+
 void WF::Reset()
 {
    ResetBit(kCalibrated);
