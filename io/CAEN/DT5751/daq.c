@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_OpenDigitizer(CAEN_DGTZ_USB, 0, 0, 0, &dt5751);
   if (err) {
-    printf("Can't open DT5751! Abort.\n");
+    printf("Can't open DT5751! Abort. Error code %d \n", err);
     return 1;
   }
 
