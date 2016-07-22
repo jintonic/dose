@@ -211,11 +211,11 @@ void Reader::Scan(unsigned short ch)
    for (int i=0; i<nmax; i++) {
       int next1 = (i<nmax-1)?(i+1):(nmax-1); // index of next sample
       int next2 = (i<nmax-2)?(i+2):(nmax-1); // index of next next sample
-      if (  wf->smpl[i]>thr/wf->pmt.gain &&
+      if (  wf->smpl[i]    >thr/wf->pmt.gain &&
             wf->smpl[next1]>thr/wf->pmt.gain &&
             wf->smpl[next2]>thr/wf->pmt.gain) { // above threshold
          if (isPed==false) continue; // previous sample also above threshold
-         if (i-nbw<=end) continue; // overlap with previous pulse
+         if (end>0 && i-nbw<=end) continue; // overlap with previous pulse
 
          // update previous pulse if any
          for (int j=bgn; j<end; j++) {
@@ -232,20 +232,19 @@ void Reader::Scan(unsigned short ch)
          // create a new pulse
          Pulse pls;
          pls.ithr=i;
-         pls.bgn=i-nbw;
+         pls.bgn=i-nbw<0?0:i-nbw;
          wf->pls.push_back(pls);
 
-         bgn=i-nbw;
+         bgn=pls.bgn;
          isPed=false; // flip flag
       } else { // below threshold
          if (isPed) continue; // previous samples also below threshold
-         end=i+nfw;
+         end=i+nfw<nmax?i+nfw:nmax-1;
          isPed=true; // flip flag
       }
    }
-   if (end>=nmax) end=nmax;
    // if the last sample != pedestal, end needs to be updated
-   if (isPed==false) end=nmax;
+   if (isPed==false) end=nmax-1;
 
    // update last pulse
    for (int j=bgn; j<end; j++) {
