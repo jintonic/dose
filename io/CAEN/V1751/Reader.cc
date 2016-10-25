@@ -277,7 +277,7 @@ void Reader::Scan(unsigned short ch)
 { 
    WF* wf = At(ch); // must have been filled
    if (wf->pmt.id==-1) return; // skip empty channels
-   if (wf->np==0) return; // nothing to suppress
+   if (wf->smpl.size()==0) return; // skip empty event
 
    // calculate pedestal; ADC -> npe
    if (run<5) Calibrate(ch, 30);
@@ -348,7 +348,11 @@ void Reader::Calibrate(unsigned short ch, unsigned short nSamples)
 { 
    WF* wf = At(ch); // must have been filled
    if (wf->pmt.id==-1) return; // skip empty channel
-   if (wf->np==0) return; // nothing to calibrate
+   if (wf->smpl.size()==0) return; // skip empty event
+   if (wf->np==0) { // nothing to calibrate
+      for (int i=0; i<nmax; i++) wf->smpl[i] = 0;
+      return;
+   }
 
    if (wf->TestBit(WF::kCalibrated)) return; // already done
    if (nfw<nSamples) return; // samples not enough
