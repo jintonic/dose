@@ -1,5 +1,11 @@
 UNIC = $(HOME)
 NICE = $(HOME)
+# Please define CAENSYS if CAEN libs are not installed in standard place
+HAS_CAEN = X$(CAENSYS)
+ifneq ($(HAS_CAEN), X)
+  CAENLIB = -L$(CAENSYS)/lib -lCAENDigitizer
+  CFLAGS  = -Wall -g -I$(CAENSYS)/include
+endif
 
 OPT2       = -O2
 
@@ -34,22 +40,27 @@ ifneq ($(ALTCXX),)
   CXX = $(ALTCXX)
 endif
 
-# Finally, define CXXFLAGS & LIBS
-CXXFLAGS+= $(ROOTCFLAGS) -I$(UNIC)/include/UNIC -I$(NICE)/include/NICE
-LIBS     = $(ROOTLIBS)
+# Finally, define CXXFLAGS
+CXXFLAGS+= $(ROOTCFLAGS) -I$(UNIC)/include -I$(NICE)/include
 
-# Define SOURCES, HEADERS & OBJECTS 
+# Define SOURCES & OBJECTS 
 # ==========================================
 
 SOURCES = $(wildcard *.cc)
-HEADERS = $(SOURCES:.cc=.h)
 OBJECTS = $(SOURCES:.cc=.o)
 DEPFILE = $(SOURCES:.cc=.d)
 
 SRCS = $(wildcard *.C)
 EXES = $(SRCS:.C=.exe)
 
-OBJS = $(wildcard *.c)
+# own sscanf.c has to be included if glibc < 2.7 is used
+GLIBC_MIN_VER = $(shell ldd --version | head -1 | awk -F. '{print $$NF}') 
+TOO_OLD = $(shell [ $(GLIBC_MIN_VER) -lt 7 ] && echo true)
+ifeq ($(TOO_OLD), true)
+  OBJS = $(wildcard *.c)
+else
+  OBJS = cfg.c daq.c
+endif
 
 # Action starts
 # =============
@@ -62,10 +73,10 @@ all: $(EXES) daq
 daq:$(OBJS)
 	@echo
 	@echo "* Creating C executable:"
-	gcc -I. -o $@.exe $(OBJS) -lCAENDigitizer
+	gcc $(CFLAGS) -o $@.exe $(OBJS) $(CAENLIB)
 
 # include *.d files, which are makefiles defining dependencies between files
-ifeq ($(filter info clean tags,$(MAKECMDGOALS)),)
+ifeq ($(filter clean,$(MAKECMDGOALS)),)
   -include $(DEPFILE)
 endif
 
@@ -85,7 +96,7 @@ endif
 $(EXES):%.exe:%.C $(OBJECTS)
 	@echo
 	@echo "* Creating C++ executables:"
-	$(CXX) $< $(OBJECTS) $(CXXFLAGS) -L$(NICE)/lib -lNICE $(LIBS) -o $@
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OBJECTS) -L$(NICE)/lib -lNICE $(ROOTLIBS)
 
 clean:
 	$(RM) *.exe *.o *.d *.d.* *~
