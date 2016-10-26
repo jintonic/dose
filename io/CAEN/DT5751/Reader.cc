@@ -1,10 +1,10 @@
 #include <cmath>
 using namespace std;
 
-#include <WF.h>
+#include <NICE/WF.h>
 using namespace NICE;
 
-#include <Units.h>
+#include <UNIC/Units.h>
 using namespace UNIC;
 
 #include "Reader.h"

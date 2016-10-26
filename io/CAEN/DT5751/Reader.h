@@ -4,8 +4,8 @@
 #include <fstream>
 #include <vector>
 
-#include <WFs.h>
-#include <Logger.h>
+#include <NICE/WFs.h>
+#include <NICE/Logger.h>
 
 #include "cfg.h"
 
