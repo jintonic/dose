@@ -57,7 +57,7 @@ int ParseConfigFile(FILE *fcfg, RUN_CFG_t *cfg)
 
     // Post Trigger (percent of the acquisition window)
     if (strstr(str, "POST_TRIGGER")!=NULL) {
-      read = fscanf(fcfg, "%d", &cfg->post);
+      read = fscanf(fcfg, "%hhu", &cfg->post);
       continue;
     }
 
