@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <signal.h>
 #include <time.h>
 #include <unistd.h>
@@ -123,7 +124,7 @@ int main(int argc, char* argv[])
   int now, tpre = now = cfg.tsec*1000 + cfg.tus/1000, dt, runtime=0;
 
   // output loop
-  int nEvtTot=0, nEvtInBuf, nNeeded = 16777216, nEvtIn5min=0;
+  int nEvtTot=0, nNeeded = 16777216, nEvtIn5min=0; uint32_t nEvtInBuf;
   if (argc==4) nNeeded=atoi(argv[3]);
   uint32_t bsize, fsize=0;
   while (nEvtTot<nNeeded && !interrupted) {
@@ -147,7 +148,7 @@ int main(int argc, char* argv[])
       CAEN_DGTZ_EventInfo_t eventInfo;
       CAEN_DGTZ_UINT16_EVENT_t *evt = NULL;
       CAEN_DGTZ_GetEventInfo(dt5751,buffer,bsize,i,&eventInfo,&rawEvt);
-      CAEN_DGTZ_DecodeEvent(dt5751,rawEvt,(void **)&evt);
+      CAEN_DGTZ_DecodeEvent(dt5751,rawEvt,(void *)evt);
 
       hdr.size=sizeof(EVENT_HEADER_t)+sizeof(uint16_t)*cfg.ns*Non;
       hdr.evtCnt=eventInfo.EventCounter;
@@ -158,7 +159,7 @@ int main(int argc, char* argv[])
 	if ((cfg.mask & (1<<ich))>>ich)
 	  fwrite(evt->DataChannel[ich],sizeof(uint16_t),cfg.ns,output);
 
-      CAEN_DGTZ_FreeEvent(dt5751,(void **)&evt);
+      CAEN_DGTZ_FreeEvent(dt5751,(void *)evt);
 
       nEvtTot++; nEvtIn5min++;
       if (nEvtTot>=nNeeded) break;
