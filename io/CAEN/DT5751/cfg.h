@@ -15,6 +15,16 @@ typedef enum {
    EXTERNAL_NIM,
 } TRG_MODE_t; ///< trigger mode
 
+/**
+ * Definiation of run header.
+ *
+ * sizeof(RUN_CFG_t) = 44 instead of 42 
+ * because of padding added to satisfy alignment constrains:
+ * http://stackoverflow.com/questions/119123/why-isnt-sizeof-for-a-struct-equal-to-the-sum-of-sizeof-of-each-member
+ *
+ * It is bad to design a not aligned struct, but it is too late to fix it
+ * - many runs has been taken with this header.
+ */
 typedef struct {
    uint32_t run;
    uint16_t subrun;
@@ -34,7 +44,8 @@ typedef struct {
    uint32_t evtCnt;  ///< event count
    uint32_t trgCnt;  ///< ticks of master clock (reset every 17s)
    uint8_t  type;    ///< 0: run info, 1: real event
-   uint16_t reserved;
+   uint8_t  reserved;///< padding byte
+   uint16_t reserved2;
 } EVENT_HEADER_t;    ///< event header
 
 void ConfigRunTime(RUN_CFG_t *cfg);
