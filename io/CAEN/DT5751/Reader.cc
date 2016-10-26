@@ -141,7 +141,7 @@ void Reader::ReadRunCfg(int i)
    nmax=cfg.ns;
    nfw=100; // set fw smpl not to be suppressed
    nbw=100; // set bw smpl not to be suppressed
-   thr=3;   // set threshold for software pulse scanning
+   thr=2;   // set threshold for software pulse scanning
 }
 
 //______________________________________________________________________________
@@ -213,7 +213,10 @@ void Reader::Scan(unsigned short ch)
       int next2 = (i<nmax-2)?(i+2):(nmax-1); // index of next next sample
       if (  wf->smpl[i]    >thr/wf->pmt.gain &&
             wf->smpl[next1]>thr/wf->pmt.gain &&
-            wf->smpl[next2]>thr/wf->pmt.gain) { // above threshold
+            wf->smpl[next2]>thr/wf->pmt.gain &&
+            next2>next1 && next1>i /*not the last sample*/) { // above threshold
+         Printf("event: %d, smpl[%d]: %.0f, smpl[%d]: %.0f, smpl[%d]: %.0f",
+               evt,i,wf->smpl[i],next1,wf->smpl[next1],next2,wf->smpl[next2]);
          if (isPed==false) continue; // previous sample also above threshold
          if (end>0 && i-nbw<=end) continue; // overlap with previous pulse
 
