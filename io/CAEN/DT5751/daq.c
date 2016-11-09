@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
       CAEN_DGTZ_EventInfo_t eventInfo;
       CAEN_DGTZ_UINT16_EVENT_t *evt = NULL;
       CAEN_DGTZ_GetEventInfo(dt5751,buffer,bsize,i,&eventInfo,&rawEvt);
-      CAEN_DGTZ_DecodeEvent(dt5751,rawEvt,(void *)evt);
+      CAEN_DGTZ_DecodeEvent(dt5751,rawEvt,(void **)&evt);
 
       hdr.size=sizeof(EVENT_HEADER_t)+sizeof(uint16_t)*cfg.ns*Non;
       hdr.evtCnt=eventInfo.EventCounter;
@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
 	if ((cfg.mask & (1<<ich))>>ich)
 	  fwrite(evt->DataChannel[ich],sizeof(uint16_t),cfg.ns,output);
 
-      CAEN_DGTZ_FreeEvent(dt5751,(void *)evt);
+      CAEN_DGTZ_FreeEvent(dt5751,(void **)&evt);
 
       nEvtTot++; nEvtIn5min++;
       if (nEvtTot>=nNeeded) break;
