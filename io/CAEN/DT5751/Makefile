@@ -2,9 +2,10 @@ UNIC = $(HOME)
 NICE = $(HOME)
 # Please define CAENSYS if CAEN libs are not installed in standard place
 HAS_CAEN = X$(CAENSYS)
+CFLAGS = -Wall -g
 ifneq ($(HAS_CAEN), X)
-  CAENLIB = -L$(CAENSYS)/lib -lCAENDigitizer
-  CFLAGS  = -Wall -g -I$(CAENSYS)/include
+  CAENLIB = -L$(CAENSYS)/lib
+  CFLAGS += -I$(CAENSYS)/include
 endif
 
 OPT2       = -O2
@@ -73,7 +74,7 @@ all: $(EXES) daq
 daq:$(OBJS)
 	@echo
 	@echo "* Creating C executable:"
-	gcc $(CFLAGS) -o $@.exe $(OBJS) $(CAENLIB)
+	gcc $(CFLAGS) -o $@.exe $(OBJS) $(CAENLIB) -lCAENDigitizer
 
 # include *.d files, which are makefiles defining dependencies between files
 ifeq ($(filter clean,$(MAKECMDGOALS)),)
