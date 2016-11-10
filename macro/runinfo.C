@@ -3,7 +3,7 @@ void runinfo(int run=1, int sub=1)
 {
    const char *dir = gSystem->Getenv("NICEDAT");
    TChain *t = new TChain("t");
-   t->Add(Form("%s/%06d/run_%06d.%06d.root",dir,run/100,run,sub));
+   t->Add(Form("%s/%04d00/run_%06d.%06d.root",dir,run/100,run,sub));
 
    WFs *wf = new WFs;
    t->SetBranchAddress("evt",&wf);
