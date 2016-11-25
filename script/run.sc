@@ -31,6 +31,7 @@ leftstring M0 = " comment"
 let A1 = 1
 let B1 = 1403415315
 let C1 = 1403418082
+rightstring D1 = "none"
 let E1 = 470
 rightstring F1 = "none"
 let G1 = 17
@@ -2173,7 +2174,7 @@ let C160 = 1479831947
 let A161 = 161
 let B161 = 1479910645
 let C161 = 1479910673
-goto B161 A105
 let A162 = 162
 let B162 = 1479911722
 let C162 = 1479944582
+goto D21 A0
