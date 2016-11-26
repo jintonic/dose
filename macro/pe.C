@@ -1,42 +1,65 @@
 using namespace NICE;
 
-void pe(int run=119)
+const char *folder = gSystem->Getenv("NICEDAT");
+
+void pe(int run=112)
+{
+   DrawWFs(run); // check location of 1 PE pulses
+   int min=0, max=0; // integration range
+   Create1PEdistr(run, min, max);
+   Fit1PEdistr(run);
+}
+
+void DrawWFs(int run)
 {
    TChain *t = new TChain("t");
-   t->Add(Form("~/data/nice/%04d00/run_%06d.000001.root",run/100,run));
+   t->Add(Form("%s/%04d00/run_%06d.000001.root",folder,run/100,run));
+   t->Draw("wf[0].smpl:Iteration$","","l",250,1);
+   TText *text = new TText(.8,.8,Form("%d",run));
+   text->SetNDC();
+   text->Draw();
+   gPad->Print(Form("wf%d.ps",run));
+}
+
+void Create1PEdistr(int run, int min, int max)
+{
+   TChain *t = new TChain("t");
+   t->Add(Form("%s/%04d00/run_%06d.000001.root",folder,run/100,run));
 
    WFs *evt = new WFs;
    t->SetBranchAddress("evt", &evt);
    t->GetEntry(1);
 
    TFile *output = new TFile(Form("%d.root",run),"recreate");
-   TH1D *h = new TH1D("h","",200,-50,150);
+   TH1D *hpe = new TH1D("hpe","",200,-50,150);
    TH1D *hmin = new TH1D("hmin","",evt->nmax,0,evt->nmax);
    TH1D *hmax = new TH1D("hmax","",evt->nmax,0,evt->nmax);
    TH1D *hrange = new TH1D("hrange","",100,0,100);
    int nevt = t->GetEntries();
+   if (nevt>50000) nevt=50000; // no need to load more than this
    for(int i=0; i<nevt; i++) {
       t->GetEntry(i);
       if (evt->At(0)->ped==0) continue;
-      double total=0, threshold;
-      int min=99999, max=0;
-      getRange(evt,min,max, threshold=1.5);
-      hmin->Fill(min);
-      hmax->Fill(max);
-      hrange->Fill(max-min);
-      //if (min!=0) cout<<i<<", "<<min<<", "<<max<<endl;
+      // search for proper range if not specified
+      if (min==0 && max==0) {
+         int min=99999, max=0;
+         double threshold=2;
+         GetProperRange(evt,min,max, threshold);
+         hmin->Fill(min);
+         hmax->Fill(max);
+         hrange->Fill(max-min);
+      }
+      double total=0;
       for (int j=min; j<max; j++) {
          total+=evt->At(0)->smpl[j];
       }
-      h->Fill(total);
+      hpe->Fill(total);
    }
    output->Write();
    output->Close();
-
-   fit(run);
 }
 
-void getRange(WFs *evt, int &min, int &max, double threshold)
+void GetProperRange(WFs *evt, int &min, int &max, double threshold)
 {
    for (int i=0; i<evt->nmax; i++) {
       if (  evt->At(0)->smpl[i]  >threshold && 
@@ -65,34 +88,29 @@ void getRange(WFs *evt, int &min, int &max, double threshold)
    return;
 }
 
-void fit(int run=107)
+void Fit1PEdistr(int run)
 {
    TFile *file = new TFile(Form("%d.root",run));
-   TH1D *h = (TH1D*) file->Get("h");
-   h->GetXaxis()->SetTitle("ADC counts");
-   h->GetYaxis()->SetTitle("Entries");
+   TH1D *hpe = (TH1D*) file->Get("hpe");
+   hpe->SetTitle(Form("run %d;ADC counts;Entries",run));
 
-   TCanvas *c = new TCanvas;
-   c->SetLogy();
+   TCanvas *can = new TCanvas;
+   can->SetLogy();
    gStyle->SetOptFit(1);
    gStyle->SetOptStat(10);
-   gStyle->SetStatW(0.2);
-   gStyle->SetStatX(0.9);
-   gStyle->SetStatY(0.9);
 
-   TF1 *f = new TF1("f", 
-         "gaus + [3]*exp(-0.5*((x-[4])/[5])**2) + [6]*exp(-0.5*((x-2*[4])/[5])**2) + [7]*exp(-0.5*((x-3*[4])/[5])**2)",
-         -50,100);
-   f->SetParNames("norm0", "mean0", "sigma0", "norm1", "mean", "sigma", "norm2", "norm3");
+   TF1 *f = new TF1("f", "gaus + gaus(3)"
+         "+ [6]*exp(-0.5*((x-2*[4])/[5])**2)"
+         " + [7]*exp(-0.5*((x-3*[4])/[5])**2)", -50,200);
+   f->SetParNames("n0", "m0", "s0", "norm", "mean", "sigma", "n2", "n3");
    f->SetParameter(1,0);
-   f->SetParameter(2,2.6);
-   f->SetParameter(4,31);
-   f->SetParameter(5,8.5);
-   h->Fit(f);
+   f->SetParameter(2,6);
+   f->SetParameter(4,40);
+   f->SetParameter(5,10);
+   hpe->Fit(f);
 
    TF1 *baseline = new TF1("baseline","gaus",-50,50);
-   baseline->SetParameters(f->GetParameter(0),
-         f->GetParameter(1), f->GetParameter(2));
+   baseline->SetParameters(f->GetParameters());
    baseline->SetLineColor(kRed);
    baseline->Draw("same");
 
@@ -102,17 +120,18 @@ void fit(int run=107)
    first->SetLineColor(kBlue);
    first->Draw("same");
 
-   TF1 *second = new TF1("second","gaus",-50,100);
+   TF1 *second = new TF1("second","gaus",-50,170);
    second->SetParameters(f->GetParameter(6),
          2*f->GetParameter(4), f->GetParameter(5));
    second->SetLineColor(kGreen);
    second->Draw("same");
 
-   TF1 *third = new TF1("third","gaus",-50,100);
+   TF1 *third = new TF1("third","gaus",-50,200);
    third->SetParameters(f->GetParameter(7),
          3*f->GetParameter(4), f->GetParameter(5));
    third->SetLineColor(kMagenta);
    third->Draw("same");
-}
 
+   can->Print(Form("1pe%d.ps",run));
+}
 
