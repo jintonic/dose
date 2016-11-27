@@ -3,9 +3,9 @@ const char *folder = gSystem->Getenv("NICEDAT"); // data location
 int min=99999, max=0; // integration range (will be updated automatically)
 
 // integration range is not fixed by default
-void pe(int run=112, int fixedMin=0, int fixedMax=0)
+void fit1pe(int run=112, int fixedMin=0, int fixedMax=0)
 {
-   //DrawWFs(run);
+   if (fixedMin!=0 && fixedMax!=0) DrawWFs(run);
    Create1PEdistr(run, fixedMin, fixedMax);
    Fit1PEdistr(run);
 }
@@ -27,6 +27,7 @@ void Create1PEdistr(int run, int fixedMin, int fixedMax)
    int nevt = t->GetEntries();
    if (nevt>50000) nevt=50000; // no need to load more than this
    for(int i=0; i<nevt; i++) {
+      if (i%5000==0) cout<<"now event "<<i<<endl;
       t->GetEntry(i);
       if (evt->At(0)->ped==0) continue;
       // search for proper range for integration
@@ -66,7 +67,7 @@ void Fit1PEdistr(int run)
          " + [7]*exp(-0.5*((x-3*[4])/[5])**2)", -50,200);
    f->SetParNames("n0", "m0", "s0", "norm", "mean", "sigma", "n2", "n3");
    f->SetParameter(1,0);
-   f->SetParameter(2,6);
+   f->SetParameter(2,4);
    f->SetParameter(4,40);
    f->SetParameter(5,10);
    hpe->Fit(f);
