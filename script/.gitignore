@@ -1,2 +1,7 @@
+*.ps
+*.eps
+*.jpg
+*.png
+*.log
 *.pdf
 run.txt
