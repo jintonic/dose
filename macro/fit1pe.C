@@ -1,32 +1,20 @@
-using namespace NICE;
+NICE::WFs *evt = new NICE::WFs; // data structure
+const char *folder = gSystem->Getenv("NICEDAT"); // data location
+int min=99999, max=0; // integration range (will be updated automatically)
 
-const char *folder = gSystem->Getenv("NICEDAT");
-
-void pe(int run=112)
+// integration range is not fixed by default
+void pe(int run=112, int fixedMin=0, int fixedMax=0)
 {
-   DrawWFs(run); // check location of 1 PE pulses
-   int min=0, max=0; // integration range
-   Create1PEdistr(run, min, max);
+   //DrawWFs(run);
+   Create1PEdistr(run, fixedMin, fixedMax);
    Fit1PEdistr(run);
 }
 
-void DrawWFs(int run)
-{
-   TChain *t = new TChain("t");
-   t->Add(Form("%s/%04d00/run_%06d.000001.root",folder,run/100,run));
-   t->Draw("wf[0].smpl:Iteration$","","l",250,1);
-   TText *text = new TText(.8,.8,Form("%d",run));
-   text->SetNDC();
-   text->Draw();
-   gPad->Print(Form("wf%d.ps",run));
-}
-
-void Create1PEdistr(int run, int min, int max)
+void Create1PEdistr(int run, int fixedMin, int fixedMax)
 {
    TChain *t = new TChain("t");
    t->Add(Form("%s/%04d00/run_%06d.000001.root",folder,run/100,run));
 
-   WFs *evt = new WFs;
    t->SetBranchAddress("evt", &evt);
    t->GetEntry(1);
 
@@ -35,20 +23,23 @@ void Create1PEdistr(int run, int min, int max)
    TH1D *hmin = new TH1D("hmin","",evt->nmax,0,evt->nmax);
    TH1D *hmax = new TH1D("hmax","",evt->nmax,0,evt->nmax);
    TH1D *hrange = new TH1D("hrange","",100,0,100);
+
    int nevt = t->GetEntries();
    if (nevt>50000) nevt=50000; // no need to load more than this
    for(int i=0; i<nevt; i++) {
       t->GetEntry(i);
       if (evt->At(0)->ped==0) continue;
-      // search for proper range if not specified
-      if (min==0 && max==0) {
-         int min=99999, max=0;
+      // search for proper range for integration
+      if (fixedMin==0 && fixedMax==0) {
          double threshold=2;
-         GetProperRange(evt,min,max, threshold);
+         SearchPulseAboveThreshold(threshold);
          hmin->Fill(min);
          hmax->Fill(max);
          hrange->Fill(max-min);
+      } else {
+         min=fixedMin; max=fixedMax;
       }
+
       double total=0;
       for (int j=min; j<max; j++) {
          total+=evt->At(0)->smpl[j];
@@ -59,40 +50,11 @@ void Create1PEdistr(int run, int min, int max)
    output->Close();
 }
 
-void GetProperRange(WFs *evt, int &min, int &max, double threshold)
-{
-   for (int i=0; i<evt->nmax; i++) {
-      if (  evt->At(0)->smpl[i]  >threshold && 
-            evt->At(0)->smpl[i+1]>threshold && 
-            evt->At(0)->smpl[i+2]>threshold) {
-         min=i;
-         break;
-      }
-   }
-   if (min==99999) min=0;
-
-   for (int i=min; i<evt->nmax; i++) {
-      if (evt->At(0)->smpl[i]<threshold) {
-         max=i;
-         break;
-      }
-   }
-   int middle = (min+max)/2;
-   min= middle-20;
-   max= middle+30;
-
-   if (min<0) min=0;
-   if (max-min<50) max=min+50;
-   if (max>evt->nmax) max=evt->nmax;
-
-   return;
-}
-
 void Fit1PEdistr(int run)
 {
    TFile *file = new TFile(Form("%d.root",run));
    TH1D *hpe = (TH1D*) file->Get("hpe");
-   hpe->SetTitle(Form("run %d;ADC counts;Entries",run));
+   hpe->SetTitle(Form("run %d;ADC counts #bullet ns;Entries",run));
 
    TCanvas *can = new TCanvas;
    can->SetLogy();
@@ -133,5 +95,48 @@ void Fit1PEdistr(int run)
    third->Draw("same");
 
    can->Print(Form("1pe%d.ps",run));
+}
+
+//______________________________________________________________________________
+// different ways to specify the integration range [min, max]
+
+// overlap many WFs in one plot to check location of 1 PE pulses by eyes
+void DrawWFs(int run)
+{
+   TChain *t = new TChain("t");
+   t->Add(Form("%s/%04d00/run_%06d.000001.root",folder,run/100,run));
+   t->Draw("wf[0].smpl:Iteration$","","l",250,1);
+   TText *text = new TText(.8,.8,Form("%d",run));
+   text->SetNDC();
+   text->Draw();
+   gPad->Print(Form("wf%d.ps",run));
+}
+
+// search the range of the 1st pulse above threshold
+void SearchPulseAboveThreshold(double threshold)
+{
+   for (int i=0; i<evt->nmax-2; i++) {
+      if (  evt->At(0)->smpl[i]  >threshold && 
+            evt->At(0)->smpl[i+1]>threshold && 
+            evt->At(0)->smpl[i+2]>threshold) {
+         min=i;
+         break;
+      }
+   }
+   if (min==99999) min=0;
+
+   for (int i=min; i<evt->nmax; i++) {
+      if (evt->At(0)->smpl[i]<threshold) {
+         max=i;
+         break;
+      }
+   }
+   int middle = (min+max)/2;
+   min= middle-20;
+   max= middle+30;
+
+   if (min<0) min=0;
+   if (max-min<50) max=min+50;
+   if (max>evt->nmax) max=evt->nmax;
 }
 
