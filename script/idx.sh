@@ -43,8 +43,7 @@ done
 
 while true; do
   qstat
-  nw=`qstat |grep qw|wc -l`
-  nr=`qstat |grep " r " | wc -l`
-  if [ $nw -eq 0 -a $nr -eq 0 ]; then break; fi
+  njobs=`qstat | egrep " idx[0-9]+." | wc -l`
+  if [ $njobs -eq 0 ]; then break; fi
   sleep 3
 done
