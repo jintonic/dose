@@ -2,14 +2,29 @@
 # analyze all 1 PE runs
 
 cat << _EOF_
+Please select integration range:
+
+1. Around the 1st peak above threshold
+2. Fixed range as specified in *.1pe
+
+_EOF_
+
+read -p "Enter selection [1(default) or 2]: "
+range="aroundPeak"
+if [ X$REPLY != X ]; then
+  if [ $REPLY -eq 2 ]; then range="fixed"; fi
+fi
+
+cat << _EOF_
+
 Please select PMT:
 
 1. R11065, 3-inch PMT
 2. R8778(AR), 2-inch PMT
 
 _EOF_
-read -p "Enter selection [1(default) or 2]: "
 
+read -p "Enter selection [1(default) or 2]: "
 PMT=R11065
 if [ X$REPLY != X ]; then
   if [ $REPLY -eq 2 ]; then PMT="R8778(AR)"; fi
@@ -46,41 +61,43 @@ fi
 echo Process run $runs ...
 for run in $runs; do
   mkdir -p $run
-  sed -r "5 s/[0-9]+/$run/" $NICESYS/macro/pe.C > $run/pe.C
+  sed -r "/fit1pe/ s/[0-9]+,/$run,/" $NICESYS/macro/fit1pe.C > $run/fit1pe.C
   Ncol=`awk -v r=$run '($1==r){print NF}' $NICESYS/script/$PMT.1pe`
-  if [ $Ncol -ge 8 ]; then
+  if [ "$range" = "fixed" -a $Ncol -ge 8 ]; then
     min=`awk -v r=$run '$1==r{print $7}' $NICESYS/script/$PMT.1pe`
     max=`awk -v r=$run '$1==r{print $8}' $NICESYS/script/$PMT.1pe`
-    sed -i -r -e "8 s/[0-9]+/$min/" -e "8 s/[0-9]+;/$max;/" $run/pe.C
+    sed -i -r "/fit1pe/ s/in=[0-9]+/in=$min/" $run/fit1pe.C
+    sed -i -r "/fit1pe/ s/ax=[0-9]+/ax=$max/" $run/fit1pe.C
   fi
   if [ $Ncol -ge 10 ]; then
     mean=`awk -v r=$run '$1==r{print $9}' $NICESYS/script/$PMT.1pe`
     sigma=`awk -v r=$run '$1==r{print $10}' $NICESYS/script/$PMT.1pe`
-    sed -i -r "100,120 s/4,[0-9]+\)/4,$mean\)/" $run/pe.C
-    sed -i -r "100,120 s/5,[0-9]+\)/5,$sigma\)/" $run/pe.C
+    sed -i -r "/SetParNames/,/^$/ s/4,[0-9]+/4,$mean/" $run/fit1pe.C
+    sed -i -r "/SetParNames/,/^$/ s/5,[0-9]+/5,$sigma/" $run/fit1pe.C
   fi
-  qsub -N pe$run -V -cwd -e $run.log -o $run.log -b y root -b -q $run/pe.C
+  qsub -N pe$run -V -cwd -e $run.log -o $run.log -b y root -b -q $run/fit1pe.C
 done
 
 while true; do
   qstat
-  nw=`qstat | grep qw | wc -l`
-  nr=`qstat | grep " r " | wc -l`
-  if [ $nw -eq 0 -a $nr -eq 0 ]; then break; fi
+  njobs=`qstat | egrep " pe[0-9]+ " | wc -l`
+  if [ $njobs -eq 0 ]; then break; fi
   sleep 3
 done
 
-echo Combining plots...
-gs -q -sDEVICE=pdfwrite -o wfs.pdf wf[0-9]*.ps
-gs -q -sDEVICE=pdfwrite -o 1pe.pdf 1pe[0-9]*.ps
+echo Generate PDF ...
+nplots=`ls wf[0-9]*.ps 2>/dev/null | wc -w`
+if [ $nplots -gt 0 ]; then gs -q -sDEVICE=pdfwrite -o wfs.pdf wf[0-9]*.ps; fi
+nplots=`ls 1pe[0-9]*.ps 2>/dev/null | wc -w`
+if [ $nplots -gt 0 ]; then gs -q -sDEVICE=pdfwrite -o 1pe.pdf 1pe[0-9]*.ps; fi
 echo Done
 
 echo Fitted mean and sigma from log file:
 for run in $runs; do
-  baseline=`awk '$1==2{printf("%.1f",$3)}' $run.log`
-  mean=`awk '$1==5{printf("%.1f",$3)}' $run.log`
-  sigma=`awk '$1==6{printf("%.1f",$3)}' $run.log`
-  mean=`echo $mean - $baseline|bc`
+  baseline=`tail $run.log | awk '$1==2{print +$3}'`
+  mean=`tail $run.log | awk '$1==5{print +$3}'`
+  sigma=`tail $run.log | awk '$1==6{print +$3}'`
+  mean=`echo $mean - $baseline | bc`
   echo $run $mean $sigma
 done
 
