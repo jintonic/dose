@@ -9,3 +9,4 @@ NICE - NaI/CsI Cryogenic Experiment
 - *run.sh*: convert run.sc to run.txt
 - *1pe.sh*: analyze all 1 PE runs
 - *R11065.1pe*: 1 PE database of PMT R11065
+- *1pe.gnu*: visualize a 1 PE database
