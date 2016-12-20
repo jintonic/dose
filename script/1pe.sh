@@ -33,7 +33,7 @@ fi
 echo
 echo Currently available information for PMT $PMT:
 last=`tail -1 $NICESYS/script/$PMT.1pe | awk '{print $1}'`
-if [ ! -f $NICESYS/script/run.txt ]; then $NICESYS/script/run.sh; fi
+$NICESYS/script/run.sh
 grep "$PMT" $NICESYS/script/run.txt | grep "1 PE" | awk -v lr=$last '
 { if ($1 > lr) printf("%4d %d %d %6.1f %d %2d\n", $1, $2, $5, $7, $10, $12) }
 ' >> $NICESYS/script/$PMT.1pe
