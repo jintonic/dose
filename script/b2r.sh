@@ -29,8 +29,8 @@ if [ X$threshold = X ]; then threshold=$thr; fi
 echo "Loop over run [$run, $max]..."
 while [ $run -le $max ]; do
   # specify executable
-  exe=$NICESYS/io/CAEN/DT5751/b2r.exe
-  if [ $run -lt 107 ]; then exe=$NICESYS/io/CAEN/V1751/b2r.exe; fi
+  exe=$NICESYS/daq/CAEN/DT5751/b2r.exe
+  if [ $run -lt 107 ]; then exe=$NICESYS/daq/CAEN/V1751/b2r.exe; fi
   # loop over sub runs
   r6d=`printf "%06d" $run`
   dir=${r6d:0:4}00
