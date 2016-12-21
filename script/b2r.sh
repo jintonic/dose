@@ -13,12 +13,18 @@ max=`echo ${max:0:6} | bc`
 echo "Run ranges from $min to $max"
 
 # skip old runs unless specified otherwise
-min=162
+min=171
 read -p "Please set minimal run number (<Enter> to accept default: $min): " run
 if [ X$run = X ]; then run=$min; fi
 read -p "Overwrite existing root files? (y/N): " overwrite
 if [ X$overwrite = X ]; then overwrite=N; fi
 echo $overwrite
+
+# threshold for peak searching
+thr=3
+echo "Please set threshold for peak searching:"
+read -p "(<Enter> to accept default: $thr ADC counts) " threshold
+if [ X$threshold = X ]; then threshold=$thr; fi
 
 echo "Loop over run [$run, $max]..."
 while [ $run -le $max ]; do
@@ -38,7 +44,7 @@ while [ $run -le $max ]; do
     cd $NICEDAT/$dir
     s6d=`echo $file | awk -F. '{print $NF}'`
     sub=`echo $file | awk -F. '{printf("%d",$NF)}'`
-    qsub -N b2r$run.$sub -V -cwd -o $file.log -e $file.log -b y $exe $run $sub $NICEDAT
+    qsub -N b2r$run.$sub -V -cwd -o $file.log -e $file.log -b y $exe $run $sub $NICEDAT $threshold 
   done
   # next run
   run=$((run+1))
