@@ -63,7 +63,7 @@ void Reader::Index()
    Info("Index","file size: %zu Byte", fileSize);
 
    // check file size
-   if (fileSize<sizeof(EVENT_HEADER_t)) {
+   if (fileSize<sizeof(EVT_HDR_t)) {
       Error("Index", "%s/%s is too small, return", fPath.Data(), fName.Data()); 
       fRaw->close();
       return;
@@ -84,9 +84,9 @@ void Reader::Index()
       fBegin.push_back(fRaw->tellg());
 
       // save event size
-      EVENT_HEADER_t hdr;
-      fRaw->read(reinterpret_cast<char *> (&hdr), sizeof(EVENT_HEADER_t));
-      if (hdr.size<=sizeof(EVENT_HEADER_t)) {
+      EVT_HDR_t hdr;
+      fRaw->read(reinterpret_cast<char *> (&hdr), sizeof(EVT_HDR_t));
+      if (hdr.size<=sizeof(EVT_HDR_t)) {
          fSize.push_back(hdr.size);
          Error("Index", "entry %zu is too small, stop indexing", fBegin.size());
          break;
@@ -94,7 +94,7 @@ void Reader::Index()
       fSize.push_back(hdr.size);
 
       //skip the rest of the block
-      fRaw->seekg(hdr.size-sizeof(EVENT_HEADER_t), ios::cur);
+      fRaw->seekg(hdr.size-sizeof(EVT_HDR_t), ios::cur);
    }
 }
 
@@ -113,14 +113,14 @@ void Reader::GetEntry(int i)
    fRaw->seekg(fBegin[i], ios::beg);
 
    while (size_t(fRaw->tellg())<fBegin[i]+fSize[i]) {
-      EVENT_HEADER_t hdr;
-      fRaw->read(reinterpret_cast<char *> (&hdr), sizeof(EVENT_HEADER_t));
+      EVT_HDR_t hdr;
+      fRaw->read(reinterpret_cast<char *> (&hdr), sizeof(EVT_HDR_t));
 
       if (hdr.type==0) {
          ReadRunCfg(i);
       } else {
-         evt = hdr.evtCnt;
-         cnt = hdr.trgCnt;
+         evt = hdr.cnt;
+         cnt = hdr.ttt;
          ReadEvent(i);
       }
    }
@@ -137,7 +137,7 @@ void Reader::ReadRunCfg(int i)
       Warning("ReadRunCfg", "unmatched run number: %d", cfg.run);
       run=cfg.run;
    }
-   sub=cfg.subrun;
+   sub=cfg.sub;
    sec=cfg.tsec;
    nmax=cfg.ns;
    nfw=100; // set fw smpl not to be suppressed
@@ -149,7 +149,7 @@ void Reader::ReadRunCfg(int i)
 
 void Reader::ReadEvent(int i)
 {
-   size_t evt_size=fSize[i]-sizeof(EVENT_HEADER_t);
+   size_t evt_size=fSize[i]-sizeof(EVT_HDR_t);
    char *content = new char[evt_size];
    fRaw->read(content, evt_size);
 

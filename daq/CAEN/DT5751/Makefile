@@ -1,89 +1,46 @@
+# dependences
 UNIC = $(HOME)
 NICE = $(HOME)
-# Please define CAENSYS if CAEN libs are not installed in standard place
-HAS_CAEN = X$(CAENSYS)
-CFLAGS = -Wall -g
-ifneq ($(HAS_CAEN), X)
-  CAENLIB = -L$(CAENSYS)/lib
-  CFLAGS += -I$(CAENSYS)/include
+DAQ = $(HOME)/github/daq
+
+LIBS = -L$(NICE)/lib -lNICE
+CXXFLAGS = -Wall -O2 -I$(UNIC)/include -I$(NICE)/include -I$(DAQ)
+
+# check if root-config exists
+ifneq ($(shell hash root-config 2> /dev/null && echo true), true)
+  $(error cannot find root-config)
 endif
 
-OPT2       = -O2
-
-ROOTCONFIG = root-config
-
-ARCH      := $(shell $(ROOTCONFIG) --arch)
-ALTCXX    := $(shell $(ROOTCONFIG) --cxx)
-ROOTCFLAGS:= $(shell $(ROOTCONFIG) --cflags)
-ROOTLIBS  := $(shell $(ROOTCONFIG) --libs)
-
-ARCHOK     = no
-
-ifeq ($(ARCH),linux)
-  CXX      = g++
-  CXXFLAGS = $(OPT2) -Wall -fPIC
-  ARCHOK   = yes
+# check if in linux
+ARCH = $(shell root-config --arch)
+ifneq ($(ARCH),linux)
+  ifneq ($(ARCH),linuxx8664gcc)
+    $(error invalid architecture: $(ARCH))
+  endif
 endif
 
-ifeq ($(ARCH),linuxx8664gcc)
-  CXX      = g++
-  CXXFLAGS = $(OPT2) -Wall -fPIC
-  ARCHOK   = yes
-endif
+# add root libs
+CXX = g++
+LIBS += $(shell root-config --libs)
+CXXFLAGS += $(shell root-config --cflags)
 
-# If arch != the above options, a error message is given
-ifeq ($(ARCHOK),no)
-  $(error $(ARCH) invalid architecture)
-endif
+# define targets
+CCS = $(wildcard *.cc)
+OBJ = $(CCS:.cc=.o)
+SRC = $(wildcard *.C)
+EXE = $(SRC:.C=.exe)
 
-# In case that ALTCXX = 0, g++ will be used as CXX
-ifneq ($(ALTCXX),)
-  CXX = $(ALTCXX)
-endif
+# Action starts here
+all: $(EXE)
 
-# Finally, define CXXFLAGS
-CXXFLAGS+= $(ROOTCFLAGS) -I$(UNIC)/include -I$(NICE)/include
-
-# Define SOURCES & OBJECTS 
-# ==========================================
-
-SOURCES = $(wildcard *.cc)
-OBJECTS = $(SOURCES:.cc=.o)
-DEPFILE = $(SOURCES:.cc=.d)
-
-SRCS = $(wildcard *.C)
-EXES = $(SRCS:.C=.exe)
-
-# own sscanf.c has to be included if glibc < 2.7 is used
-GLIBC_MIN_VER = $(shell ldd --version | head -1 | awk -F. '{print $$NF}') 
-TOO_OLD = $(shell [ $(GLIBC_MIN_VER) -lt 7 ] && echo true)
-ifeq ($(TOO_OLD), true)
-  OBJS = $(wildcard *.c)
-else
-  OBJS = cfg.c daq.c
-endif
-
-# Action starts
-# =============
-
-all: $(EXES) daq
-	@echo
-	@echo "* Done!"
-	@echo 
-
-daq:$(OBJS)
-	@echo
-	@echo "* Creating C executable:"
-	gcc $(CFLAGS) -o $@.exe $(OBJS) $(CAENLIB) -lCAENDigitizer
-
-# include *.d files, which are makefiles defining dependencies between files
+# include *.d files
 ifeq ($(filter clean,$(MAKECMDGOALS)),)
-  -include $(DEPFILE)
+  -include $(CCS:.cc=.d)
 endif
 
 # rules to create *.d files
 %.d:%.cc
-	@echo creating $@
+	@echo $@ created
 	@set -e; rm -f $@; \
 	  $(CXX) -MM $(CPPFLAGS) $< > $@.$$$$; \
 	  sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
@@ -94,10 +51,8 @@ endif
 # Since this is obvious, "make" automatically does it. 
 # There is no need to explicitly write down the rules to do it.
 
-$(EXES):%.exe:%.C $(OBJECTS)
-	@echo
-	@echo "* Creating C++ executables:"
-	$(CXX) $(CXXFLAGS) -o $@ $< $(OBJECTS) -L$(NICE)/lib -lNICE $(ROOTLIBS)
+$(EXE):%.exe:%.C $(OBJ)
+	$(CXX) $(CXXFLAGS) -o $@ $< $(OBJ) $(LIBS)
 
 clean:
 	$(RM) *.exe *.o *.d *.d.* *~

@@ -7,7 +7,7 @@
 #include <NICE/WFs.h>
 #include <NICE/Logger.h>
 
-#include "cfg.h"
+#include <CAEN/DT5751/cfg.h>
 
 class Reader: public NICE::WFs, public NICE::Logger
 {
