@@ -10,12 +10,13 @@ using namespace UNIC;
 #include "Reader.h"
 
 Reader::Reader(int run, int sub, const char *dir) :
-WFs(run), Logger(), fRaw(0)
+WFs(run), Logger(), fRaw(0), fNttt(0)
 {
    fPath = Form("%s/%04d00", dir, run/100);
    fName = Form("run_%06d.%06d", run, sub);
+   fData = new uint32_t[400000];
    Index();
-   nch=4;
+   nch=Nch;
    thr=3;// set default threshold for software pulse scanning
    Initialize();
 }
@@ -119,8 +120,11 @@ void Reader::GetEntry(int i)
       if (hdr.type==0) {
          ReadRunCfg(i);
       } else {
-         evt = hdr.cnt;
+         if (hdr.ttt<0) hdr.ttt=-hdr.ttt;
+         if (hdr.cnt>id && hdr.ttt<cnt) fNttt++;
+         id = hdr.cnt;
          cnt = hdr.ttt;
+         t = (fNttt*2147483647.+cnt)*8*ns;
          ReadEvent(i);
       }
    }
@@ -133,50 +137,39 @@ void Reader::ReadRunCfg(int i)
    RUN_CFG_t cfg;
    fRaw->read(reinterpret_cast<char *> (&cfg), sizeof(RUN_CFG_t));
 
-   if ((uint32_t)run!=cfg.run) {
+   if ((uint16_t)run!=cfg.run) {
       Warning("ReadRunCfg", "unmatched run number: %d", cfg.run);
       run=cfg.run;
    }
+   id=-1; // use negative event id to indicate that it is not a real event
    sub=cfg.sub;
-   sec=cfg.tsec;
+   sec=cfg.tsec+cfg.tus*1e-6;
    nmax=cfg.ns;
+   for (int i=0; i<nch; i++) if (cfg.mask>>i & 0x1 == 0) At(i)->pmt.id=-1;
    nfw=100; // set fw smpl not to be suppressed
    nbw=100; // set bw smpl not to be suppressed
 }
 
-//______________________________________________________________________________
-//
+//------------------------------------------------------------------------------
 
 void Reader::ReadEvent(int i)
 {
-   size_t evt_size=fSize[i]-sizeof(EVT_HDR_t);
-   char *content = new char[evt_size];
-   fRaw->read(content, evt_size);
+   size_t nWords=0, nTotal=fSize[i]-sizeof(EVT_HDR_t);
+   fRaw->read(reinterpret_cast<char *> (fData), nTotal);
+   for (unsigned short ch=0; ch<nch; ch++) {
+      WF* wf = At(ch); // must have been initialized
+      if (wf->pmt.id==-1) continue; // skip empty channel
+      wf->Reset(); wf->freq=1*GHz; // reset waveform
 
-   uint16_t *data = (uint16_t*) (content);
-   unsigned int processed=0;
-   unsigned short ch=0;
-   while(processed<evt_size && ch<nch) {
-      ReadWF(ch,data);
-      data+=nmax*sizeof(uint16_t); // move pointer to next raw waveform
-      processed+=nmax*sizeof(uint16_t); // data size in byte
-      ch++; // increase ch count
+      int nsmpl=0, nzip=3;
+      while (nsmpl<nmax) {
+         nsmpl+=nzip;
+         if (nsmpl>nmax) nzip=3-(nsmpl-nmax); // last word
+         for (int i=0; i<nzip; i++)
+            wf->smpl.push_back((fData[nWords]>>10*i) & 0x3FF);
+         nWords++;
+      }
    }
-
-   delete[] content;
-}
-
-//------------------------------------------------------------------------------
-
-void Reader::ReadWF(unsigned short ch, uint16_t *data)
-{
-   WF* wf = At(ch); // must have been initialized
-   if (wf->pmt.id==-1) return; // skip empty channel
-
-   wf->Reset();
-   wf->freq=1*GHz;
-
-   for (int i=0; i<nmax; i++) wf->smpl.push_back(data[i]);
 }
 
 //------------------------------------------------------------------------------

@@ -17,10 +17,12 @@ class Reader: public NICE::WFs, public NICE::Logger
       TString fName; ///< name of binary file
       std::vector<size_t> fBegin; ///< beginning of each event
       std::vector<size_t> fSize; ///< size of each event
+      int fNttt; ///< number of overwrite of trigger time tag
+      uint32_t *fData; ///< raw waveform data
 
    public:
       Reader(int run, int sub=1, const char *dir=".");
-      virtual ~Reader() { Close(); }
+      virtual ~Reader() { delete[] fData; Close(); }
 
       const char* GetFile() { return fName.Data(); }
 
@@ -35,7 +37,6 @@ class Reader: public NICE::WFs, public NICE::Logger
 
       void ReadRunCfg(int i);
       void ReadEvent(int i);
-      void ReadWF(unsigned short ch, uint16_t *data);
       /**
        * Scan pulses in a waveform
        */
