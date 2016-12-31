@@ -10,9 +10,9 @@ void runinfo(int run=1, int sub=1)
    
    int n = t->GetEntries();
    cout<<"Run "<<run<<" has "<<n<<" events"<<endl;
-   t->GetEntry(1); double t0=wf->sec;
-   cout<<"It starts at "<<t0<<endl;
-   t->GetEntry(n-1); double t1=wf->sec;
-   cout<<"     ends at "<<t1<<endl;
-   cout<<"Live time: "<<t1-t0<<" seconds."<<endl;
+   cout.precision(16);
+   t->GetEntry(0); double start=wf->sec, t0=wf->t;
+   cout<<"Start time: "<<start<<" second."<<endl;
+   t->GetEntry(n-1); double t1=wf->t;
+   cout<<"Live time: "<<(t1-t0)*1e-9<<" seconds."<<endl;
 }
