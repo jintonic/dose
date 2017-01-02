@@ -145,7 +145,7 @@ void Reader::ReadRunCfg(int i)
    sub=cfg.sub;
    sec=cfg.tsec+cfg.tus*1e-6;
    nmax=cfg.ns;
-   for (int i=0; i<nch; i++) if (cfg.mask>>i & 0x1 == 0) At(i)->pmt.id=-1;
+   for (int i=0; i<nch; i++) if ((cfg.mask>>i & 0x1) == 0) At(i)->pmt.id=-1;
    nfw=100; // set fw smpl not to be suppressed
    nbw=100; // set bw smpl not to be suppressed
 }
@@ -166,7 +166,7 @@ void Reader::ReadEvent(int i)
          nsmpl+=nzip;
          if (nsmpl>nmax) nzip=3-(nsmpl-nmax); // last word
          for (int i=0; i<nzip; i++)
-            wf->smpl.push_back((fData[nWords]>>10*i) & 0x3FF);
+            wf->smpl.push_back(fData[nWords]>>10*i & 0x3FF);
          nWords++;
       }
    }
