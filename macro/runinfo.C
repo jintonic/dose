@@ -11,7 +11,7 @@ void runinfo(int run=1, int sub=1)
    int n = t->GetEntries();
    cout<<"Run "<<run<<" has "<<n<<" events"<<endl;
    cout.precision(16);
-   t->GetEntry(0); double start=wf->sec, t0=wf->t;
+   t->GetEntry(0); double start=wf->t0, t0=wf->t;
    cout<<"Start time: "<<start<<" second."<<endl;
    t->GetEntry(n-1); double t1=wf->t, dt = (t1-t0)*1e-9;
    cout<<"Live time: "<<dt<<" seconds."<<endl;
