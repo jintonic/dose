@@ -10,7 +10,7 @@ using namespace UNIC;
 #include "Reader.h"
 
 Reader::Reader(int run, int sub, const char *dir) :
-WFs(run), Logger(), fRaw(0)
+WFs(run), Logger(), fRaw(0), fNttt(0)
 {
    fPath = Form("%s/%04d00", dir, run/100);
    fName = Form("run_%06d.%06d", run, sub);
@@ -119,8 +119,10 @@ void Reader::GetEntry(int i)
       if (hdr.reserved2==1) {
          ReadRunInfo(i);
       } else if (hdr.reserved2==0) {
-         evt = hdr.eventCount;
+         if (int(hdr.eventCount)>id && int(hdr.TTimeTag)<cnt) fNttt++;
+         id = hdr.eventCount;
          cnt = hdr.TTimeTag;
+         t = (fNttt*2147483647.+cnt)*8*ns;
          ReadEvent(i);
       } else {
          Warning("GetEntry", "unknown entry %d, skipped", i);
@@ -142,8 +144,9 @@ void Reader::ReadRunInfo(int i)
       Warning("ReadRunInfo", "unmatched run number: %d", hdr->run_number);
       run=hdr->run_number;
    }
+   id=-1; // use negative event id to indicate that it is not a real event
    sub=hdr->sub_run_number;
-   sec=hdr->linux_time_sec;
+   sec=hdr->linux_time_sec+hdr->linux_time_us*1e-6;
    nmax=hdr->custom_size*8;
    nfw=hdr->nsamples_lfw*8;
    nbw=hdr->nsamples_lbk*8;

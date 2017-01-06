@@ -11,6 +11,7 @@ class Reader: public NICE::WFs, public NICE::Logger
 {
    private:
       ifstream *fRaw;///< pointer to binary file
+      int fNttt;     ///< number of overwrites of trigger time tag
       TString fPath; ///< path to binary file
       TString fName; ///< name of binary file
       std::vector<size_t> fBegin; ///< beginning of each event
@@ -30,7 +31,8 @@ class Reader: public NICE::WFs, public NICE::Logger
          unsigned boardID        :5;
          unsigned eventCount     :24;
          unsigned reserved2      :8; ///< 0: run header, 1: real data
-         unsigned TTimeTag       :32;///< ticks of master clock
+         unsigned TTimeTag       :31;///< ticks of master clock
+         unsigned rollOverFlag   :1;
       } CAEN_DGTZ_LHEADER_t;
 
       /**
