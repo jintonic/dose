@@ -10,7 +10,7 @@ using namespace UNIC;
 #include "Reader.h"
 
 Reader::Reader(int run, int sub, const char *dir) :
-WFs(run), Logger(), fRaw(0), fNttt(0)
+WFs(run), Logger(), fRaw(0), fNttt(0), fNwarnings(0)
 {
    fPath = Form("%s/%04d00", dir, run/100);
    fName = Form("run_%06d.%06d", run, sub);
@@ -244,11 +244,15 @@ void Reader::ReadWF(unsigned short ch, unsigned int *data)
    // check length of wf
    // sometimes nSamples == nmax + 8 (or 16) when the waveform ends with
    // non-suppressed samples. It looks like a DAQ bug.
-   if (nSamples>nmax+size_t(16)) {
+   if (nSamples!=nmax && fNwarnings<10) {
       Warning("ReadWF",
             "number of samples in PMT %2d is %zu,", wf->pmt.id, nSamples);
       Warning("ReadWF",
             "while total number of samples is %d", nmax);
+      Warning("ReadWF",
+            "set nmax to %zu", nSamples);
+      fNwarnings++;
+      nmax=nSamples;
    }
    wf->ns=nSamples;
 
@@ -286,6 +290,7 @@ void Reader::Scan(unsigned short ch)
    if (run<5) Calibrate(ch, 30);
    else if (run>79 && run<96) Calibrate(ch, 20);
    else Calibrate(ch, 96);
+   return;
 
    // reset pulses defined by hardware 0-suppression
    wf->np=0; // do it after calibration
@@ -309,7 +314,7 @@ void Reader::Scan(unsigned short ch)
                wf->pls.back().ih=j;
             }
             if (wf->smpl[j]==wf->ped/wf->pmt.gain)
-               wf->pls.back().SetBit(Pulse::kSaturated);
+               wf->pls.back().isSaturated=true;
             wf->pls.back().npe+=wf->smpl[j];
          }
          if (end!=bgn) wf->pls.back().end=end;
@@ -338,7 +343,7 @@ void Reader::Scan(unsigned short ch)
          wf->pls.back().ih=j;
       }
       if (wf->smpl[j]==wf->ped/wf->pmt.gain)
-         wf->pls.back().SetBit(Pulse::kSaturated);
+         wf->pls.back().isSaturated=true;
       wf->pls.back().npe+=wf->smpl[j];
    }
    if (end!=bgn) wf->pls.back().end=end;
@@ -357,7 +362,6 @@ void Reader::Calibrate(unsigned short ch, unsigned short nSamples)
       return;
    }
 
-   if (wf->TestBit(WF::kCalibrated)) return; // already done
    if (nfw<nSamples) return; // samples not enough
 
    // rough calculation of pedestal
@@ -410,6 +414,4 @@ void Reader::Calibrate(unsigned short ch, unsigned short nSamples)
       wf->smpl[i] = (wf->ped - wf->smpl[i])/wf->pmt.gain;
    }
    wf->smpl.resize(nmax); // remove unnecessary samples
-
-   wf->SetBit(WF::kCalibrated);
 }

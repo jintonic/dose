@@ -20,52 +20,16 @@ namespace NICE { class WF; }
 class NICE::WF : public TObject
 {
    public:
-      enum {
-         kCalibrated = BIT(14),
-      };
-
-      /**
-       * Sampling frequency
-       */
-      double freq; // sampling frequency
-      /**
-       * Pedestal
-       */
-      double ped; // pedestal
-      /**
-       * RMS of pedestal
-       */
-      double prms; // RMS of pedestal
-      /**
-       * 32 bits trigger count
-       */
-      unsigned int ctrg; // 32 bits trigger count
-
-      /**
-       * Waveform samples
-       */
-      std::vector<double> smpl; // waveform samples
-      /**
-       * Number of waveform samples
-       */
-      unsigned short ns; // number of samples
-      /**
-       * Array of pulses
-       */
-      std::vector<Pulse> pls; // array of pulses
-      /**
-       * Number of pulses
-       */
-      unsigned short np; // number of pulses
-      /**
-       * Total number of photoelectrons
-       */
-      double npe; // total number of photoelectrons
-
-      /**
-       * Information of related PMT
-       */
-      PMT pmt; // information of related PMT
+      double freq; ///< sampling frequency
+      double ped;  ///< pedestal
+      double prms; ///< RMS of pedestal
+      unsigned int ctrg; ///< 32 bits trigger count
+      std::vector<double> smpl; ///< waveform samples
+      unsigned short ns; ///< number of samples
+      std::vector<Pulse> pls; ///< array of pulses
+      unsigned short np; ///< number of pulses
+      double npe; ///< total number of photoelectrons
+      PMT pmt; ///< information of related PMT
 
       WF();
       virtual ~WF() {};
@@ -85,7 +49,7 @@ class NICE::WF : public TObject
 
       double GetIntegral(short start, short end); ///< Integrate in [start, end)
 
-      Pulse* GetPulse(unsigned short idx=0); // Get the idx pulse
+      Pulse* GetPulse(unsigned short idx=0); ///< Get the idx pulse
 
       void Reset();
 

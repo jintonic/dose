@@ -225,7 +225,7 @@ void Reader::Scan(unsigned short ch)
                wf->pls.back().ih=j;
             }
             if (wf->smpl[j]==wf->ped/wf->pmt.gain)
-               wf->pls.back().SetBit(Pulse::kSaturated);
+               wf->pls.back().isSaturated=true;
             wf->pls.back().npe+=wf->smpl[j];
          }
          if (end!=bgn) wf->pls.back().end=end;
@@ -254,7 +254,7 @@ void Reader::Scan(unsigned short ch)
          wf->pls.back().ih=j;
       }
       if (wf->smpl[j]==wf->ped/wf->pmt.gain)
-         wf->pls.back().SetBit(Pulse::kSaturated);
+         wf->pls.back().isSaturated=true;
       wf->pls.back().npe+=wf->smpl[j];
    }
    if (end!=bgn) wf->pls.back().end=end;
@@ -268,7 +268,6 @@ void Reader::Calibrate(unsigned short ch, unsigned short nSamples)
    WF* wf = At(ch); // must have been filled
    if (wf->pmt.id==-1) return; // skip empty channel
 
-   if (wf->TestBit(WF::kCalibrated)) return; // already done
    if (wf->smpl.size()<nSamples) return; // samples not enough
 
    // rough calculation of pedestal
@@ -322,5 +321,4 @@ void Reader::Calibrate(unsigned short ch, unsigned short nSamples)
       integral+=wf->smpl[i];
    }
    wf->npe=integral;
-   wf->SetBit(WF::kCalibrated);
 }
