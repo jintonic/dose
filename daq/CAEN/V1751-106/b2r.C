@@ -28,7 +28,7 @@ void b2r(int run, int sub=1, const char* dir=".")
       input.GetEntry(i);
       if (input.thr==0) input.thr=3; // set threshold if no hardware one
       for (int ch=0; ch<input.nch; ch++) input.Scan(ch);
-      t.Fill();
+      if (input.id>0) t.Fill(); // fill real events
       if (i%5000==0) cout<<"entry "<<i<<" processed"<<endl;
    }
    output.Write("t", TObject::kWriteDelete);
