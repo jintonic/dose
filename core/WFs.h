@@ -39,8 +39,9 @@ class NICE::WFs : public TObject
       int cnt; ///< trigger count
       double t; ///< nano sec calculated from trigger count
       /**
-       * Seconds to Unix epoch
-       * Valid till year 2038. = sec + usec*1e-6 
+       * Seconds to Unix epoch.
+       * It is valid till year 2038. It equals to tv_sec + tv_usec*1e-6,
+       * where tv_sec and tv_usec are given by gettimeofday(&tv,NULL).
        */
       double t0;
       /**

@@ -146,7 +146,7 @@ void Reader::ReadRunInfo(int i)
    }
    id=-1; // use negative event id to indicate that it is not a real event
    sub=hdr->sub_run_number;
-   sec=hdr->linux_time_sec+hdr->linux_time_us*1e-6;
+   t0=hdr->linux_time_sec+hdr->linux_time_us*1e-6;
    nmax=hdr->custom_size*8;
    nfw=hdr->nsamples_lfw*8;
    nbw=hdr->nsamples_lbk*8;

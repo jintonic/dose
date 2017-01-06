@@ -16,7 +16,7 @@ using namespace UNIC;
 using namespace NICE;
 
 WFs::WFs(int run) : TObject(), run(run), sub(-1), id(-1), cnt(-1),
-   t(-1), sec(-1), nch(8), nmax(0), nfw(0), nbw(0), thr(0)
+   t(-1), t0(-1), nch(8), nmax(0), nfw(0), nbw(0), thr(0)
 { Class()->IgnoreTObjectStreamer(); }
 
 //------------------------------------------------------------------------------
