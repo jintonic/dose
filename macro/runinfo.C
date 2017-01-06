@@ -13,6 +13,11 @@ void runinfo(int run=1, int sub=1)
    cout.precision(16);
    t->GetEntry(0); double start=wf->sec, t0=wf->t;
    cout<<"Start time: "<<start<<" second."<<endl;
-   t->GetEntry(n-1); double t1=wf->t;
-   cout<<"Live time: "<<(t1-t0)*1e-9<<" seconds."<<endl;
+   t->GetEntry(n-1); double t1=wf->t, dt = (t1-t0)*1e-9;
+   cout<<"Live time: "<<dt<<" seconds."<<endl;
+
+   t->Draw(Form("t>>h(100,0,%f)",t1-t0));
+   h->Scale(100e9/(t1-t0));
+   h->SetTitle(";Time [ns];Trigger rate [Hz]");
+   h->Fit("pol0");
 }
