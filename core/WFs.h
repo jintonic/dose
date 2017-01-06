@@ -42,7 +42,7 @@ class NICE::WFs : public TObject
        * Seconds to Unix epoch
        * Valid till year 2038. = sec + usec*1e-6 
        */
-      double sec;
+      double t0;
       /**
        * Total number of available channels
        * Filled after loading PMT database
@@ -71,8 +71,7 @@ class NICE::WFs : public TObject
       TClonesArray wf; ///< waveform array
 
    public:
-      WFs(int run=999999) : TObject(), run(run), sub(-1), id(-1), cnt(-1),
-      t(-1), sec(-1), nch(8), nmax(0), nfw(0), nbw(0), thr(0) {};
+      WFs(int run=999999);
       virtual ~WFs() {};
 
       void Initialize(const char *db="/path/to/pmt");
@@ -80,7 +79,7 @@ class NICE::WFs : public TObject
       WF* At(unsigned short i) const;
       WF* operator[](unsigned short i) const { return At(i); }
 
-      ClassDef(WFs,2);
+      ClassDef(WFs,1);
 };
 
 #endif

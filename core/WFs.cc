@@ -5,6 +5,7 @@ using namespace std;
 #include <dirent.h>
 #include <sys/stat.h>
 
+#include <TClass.h>
 #include <TSystem.h>
 
 #include <UNIC/Units.h>
@@ -13,6 +14,10 @@ using namespace UNIC;
 #include "WF.h"
 #include "WFs.h"
 using namespace NICE;
+
+WFs::WFs(int run) : TObject(), run(run), sub(-1), id(-1), cnt(-1),
+   t(-1), sec(-1), nch(8), nmax(0), nfw(0), nbw(0), thr(0)
+{ Class()->IgnoreTObjectStreamer(); }
 
 //------------------------------------------------------------------------------
 

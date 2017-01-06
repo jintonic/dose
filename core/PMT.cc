@@ -1,11 +1,18 @@
 #include <cstdio>
 using namespace std;
 
+#include <TClass.h>
+
 #include <UNIC/Units.h>
 using namespace UNIC;
 
 #include "PMT.h"
 using namespace NICE;
+
+PMT::PMT(): TObject(), st(kUnknown), id(-1), ch(-1), dt(0), gain(1)
+{ Class()->IgnoreTObjectStreamer(); }
+
+//------------------------------------------------------------------------------
 
 void PMT::SetStatus(const char* status)
 {
