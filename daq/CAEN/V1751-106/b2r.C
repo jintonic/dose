@@ -16,9 +16,10 @@ using namespace NICE;
 /**
  * convert binary file to ROOT format.
  */
-void b2r(int run, int sub=1, const char* dir=".")
+void b2r(int run, int sub=1, const char* dir=".", unsigned short software_threshold=3)
 {
    Reader input(run, sub, dir);
+   input.thr=software_threshold;
    TFile output(Form("%s.root",input.GetFile()),"recreate");
    TTree t("t",Form("events in run %d, sub run %d", run, sub));
    t.Branch("evt", "NICE::WFs", &input, 32000, 3);
@@ -26,10 +27,12 @@ void b2r(int run, int sub=1, const char* dir=".")
    cout<<input.GetEntries()<<" entries to be processed"<<endl;
    for (int i=0; i<input.GetEntries(); i++) {
       input.GetEntry(i);
-      if (input.thr==0) input.thr=3; // set threshold if no hardware one
+      // set threshold if no hardware one
+      if (input.thr==0) input.thr=software_threshold;
       for (int ch=0; ch<input.nch; ch++) input.Scan(ch);
       if (input.id>0) t.Fill(); // fill real events
-      if (i%5000==0) cout<<"entry "<<i<<" processed"<<endl;
+      if (i%5000==0 || i==input.GetEntries()-1)
+         cout<<"entry "<<i<<" processed"<<endl;
    }
    output.Write("t", TObject::kWriteDelete);
    output.Close();
@@ -38,9 +41,9 @@ void b2r(int run, int sub=1, const char* dir=".")
 
 int main(int argc, char** argv)
 {
-   if (argc<2 || argc>4) {
+   if (argc<2 || argc>5) {
       cout<<"usage: "<<endl;
-      cout<<"./b2r run <subrun> </path/to/data/dir>"<<endl;
+      cout<<"./b2r run <subrun> </path/to/data/dir> <software threshold>"<<endl;
       return 1;
    }
 
@@ -60,6 +63,11 @@ int main(int argc, char** argv)
          if (stat(argv[3],&st)!=0) {
             cerr<<"cannot open "<<argv[3]<<endl;
             return 1;
+         }
+         if (argc>4) {
+            unsigned short threshold = atoi(argv[4]);
+            b2r(run, sub, argv[3],threshold);
+            return 0;
          }
          b2r(run, sub, argv[3]);
          return 0;
