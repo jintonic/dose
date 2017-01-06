@@ -325,7 +325,7 @@ rightstring I23 = "R8778(AR)"
 let J23 = 1200
 rightstring K23 = "PMT"
 let L23 = 10.2
-leftstring M23 = " peak!"
+leftstring M23 = " cali, no peak"
 let A24 = 24
 let B24 = 1404716155
 let C24 = 1404717535
@@ -845,7 +845,7 @@ rightstring I63 = "R8778(AR)"
 let J63 = 1100
 rightstring K63 = "PMT"
 let L63 = 1
-leftstring M63 = " ch2: 8dB, no ZLE, 4 us"
+leftstring M63 = " ch2: 8dB, no ZLE, 4 us, data corrupted"
 let A64 = 64
 let B64 = 1405320581
 let C64 = 1405321972
@@ -2302,4 +2302,4 @@ let J175 = 800
 rightstring K175 = "PMT"
 let L175 = 1
 leftstring M175 = " rate:~30Hz, with Pb bricks"
-goto M175 L159
+goto M126 A56
