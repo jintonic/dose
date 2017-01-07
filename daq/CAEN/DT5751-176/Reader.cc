@@ -139,6 +139,7 @@ void Reader::ReadRunCfg(int i)
       Warning("ReadRunCfg", "unmatched run number: %d", cfg.run);
       run=cfg.run;
    }
+   id=-1; // use negative event id to indicate that it is not a real event
    sub=cfg.subrun;
    t0=cfg.tsec+cfg.tus*1e-6;
    nmax=cfg.ns;
