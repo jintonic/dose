@@ -42,7 +42,8 @@ typedef struct {
 typedef struct {
    uint32_t size;    ///< size of header + size of data
    uint32_t evtCnt;  ///< event count
-   uint32_t trgCnt;  ///< ticks of master clock (reset every 17s)
+   unsigned trgCnt:31;///< ticks of master clock (reset every 17s)
+   unsigned rollOverFlag:1;
    uint8_t  type;    ///< 0: run info, 1: real event
    uint8_t  reserved;///< padding byte
    uint16_t reserved2;

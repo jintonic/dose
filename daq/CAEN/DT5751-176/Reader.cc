@@ -10,7 +10,7 @@ using namespace UNIC;
 #include "Reader.h"
 
 Reader::Reader(int run, int sub, const char *dir) :
-WFs(run), Logger(), fRaw(0)
+WFs(run), Logger(), fRaw(0), fNttt(0), fNwarnings(0)
 {
    fPath = Form("%s/%04d00", dir, run/100);
    fName = Form("run_%06d.%06d", run, sub);
@@ -119,8 +119,10 @@ void Reader::GetEntry(int i)
       if (hdr.type==0) {
          ReadRunCfg(i);
       } else {
-         evt = hdr.evtCnt;
+         if (int(hdr.evtCnt)>id && int(hdr.trgCnt)<cnt) fNttt++;
+         id = hdr.evtCnt;
          cnt = hdr.trgCnt;
+         t = (fNttt*2147483647.+cnt)*8*ns;
          ReadEvent(i);
       }
    }
@@ -138,7 +140,7 @@ void Reader::ReadRunCfg(int i)
       run=cfg.run;
    }
    sub=cfg.subrun;
-   sec=cfg.tsec;
+   t0=cfg.tsec+cfg.tus*1e-6;
    nmax=cfg.ns;
    nfw=100; // set fw smpl not to be suppressed
    nbw=100; // set bw smpl not to be suppressed

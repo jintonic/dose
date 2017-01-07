@@ -10,7 +10,7 @@ using namespace UNIC;
 #include "Reader.h"
 
 Reader::Reader(int run, int sub, const char *dir) :
-WFs(run), Logger(), fRaw(0), fNttt(0)
+WFs(run), Logger(), fRaw(0), fNttt(0), fNwarnings(0)
 {
    fPath = Form("%s/%04d00", dir, run/100);
    fName = Form("run_%06d.%06d", run, sub);
