@@ -121,7 +121,7 @@ void Reader::GetEntry(int i)
          ReadRunCfg(i);
       } else {
          if (hdr.ttt<0) hdr.ttt=-hdr.ttt;
-         if (hdr.cnt>id && hdr.ttt<cnt) fNttt++;
+         if (hdr.cnt>id && int(hdr.ttt)<cnt) fNttt++;
          id = hdr.cnt;
          cnt = hdr.ttt;
          t = (fNttt*2147483647.+cnt)*8*ns;
