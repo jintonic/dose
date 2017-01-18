@@ -11,6 +11,7 @@ using namespace std;
 #include <TTree.h>
 
 #include "Reader.h"
+#include <NICE/WF.h>
 using namespace NICE;
 
 /**
@@ -32,7 +33,7 @@ void b2r(int run, int sub=1, const char* dir=".", unsigned short software_thresh
       if (i%5000==0 || i==input.GetEntries()-1)
          cout<<"entry "<<i<<" processed"<<endl;
    }
-   output.Write("t", TObject::kWriteDelete);
+   t.Write("", TObject::kWriteDelete);
    output.Close();
    cout<<"done"<<endl;
 }
