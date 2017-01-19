@@ -26,14 +26,14 @@ void b2r(int run, int sub=1, const char* dir=".", unsigned short software_thresh
    t.Branch("evt", "NICE::WFs", &input, 32000, 3);
 
    cout<<input.GetEntries()<<" entries to be processed"<<endl;
-   for (int i=0; i<input.GetEntries(); i++) {
+   for (int i=0; i<input.GetEntries()-1; i++) {
       input.GetEntry(i);
+      if (input.id<0) continue; // skip run cfg
       for (int ch=0; ch<input.nch; ch++) input.Scan(ch);
-      if (input.id>0) t.Fill(); // fill real events
-      if (i%5000==0 || i==input.GetEntries()-1)
-         cout<<"entry "<<i<<" processed"<<endl;
+      t.Fill();
+      if (i%5000==0) cout<<"entry "<<i<<" processed"<<endl;
    }
-   t.Write("", TObject::kWriteDelete);
+   t.Write("", TObject::kOverwrite);
    output.Close();
    cout<<"done"<<endl;
 }
