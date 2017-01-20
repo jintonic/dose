@@ -162,17 +162,23 @@ void Reader::ReadEvent(int i)
       wf->Reset(); wf->freq=1*GHz; // reset waveform
 
       int nWords=0, nsmpl=0, nzip=3;
-      while (nsmpl<nmax) {
+      while (nsmpl<nmax && nWords<int(nTotal/4/4)) {
          nzip = fData[nWords]>>30 & 0x3;
-         if (nzip<1 || nzip>3) break;
+         if (nzip<1 || nzip>3)
+            Warning("ReadEvent",
+                  "evt %d: ch%u, nsmpl %d, nWords %d, nzip %d, smpl: %u %u %u",
+                  i, ch, nsmpl, nWords, nzip, fData[nWords]>>20 & 0x3ff,
+                  fData[nWords]>>10 & 0x3ff, fData[nWords] & 0x3ff);
          for (int i=0; i<nzip; i++)
-            wf->smpl.push_back(fData[nWords]>>10*i & 0x3FF);
+            wf->smpl.push_back(float(fData[nWords]>>10*i & 0x3FF));
          nsmpl+=nzip;
          nWords++;
       }
-      if (nsmpl!=nmax)
+      if (nsmpl!=nmax) {
          Warning("ReadEvent", 
-               "nsmpl, %d != nmax, %d. Set nmax to %d.", nsmpl, nmax, nsmpl);
+               "nsmpl(%d) != nmax(%d). Set nmax to %d.", nsmpl, nmax, nsmpl);
+         nmax=nsmpl;
+      }
    }
 }
 
@@ -265,7 +271,7 @@ void Reader::Calibrate(unsigned short ch, unsigned short nSamples)
    WF* wf = At(ch); // must have been filled
    if (wf->pmt.id==-1) return; // skip empty channel
 
-   if (wf->smpl.size()<nSamples) return; // samples not enough
+   if (wf->smpl.size()<100) return; // samples not enough
 
    // rough calculation of pedestal
    double rough=0; // rough value of pedestal
