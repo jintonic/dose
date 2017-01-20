@@ -154,30 +154,20 @@ void Reader::ReadRunCfg(int i)
 
 void Reader::ReadEvent(int i)
 {
-   size_t nTotal=fSize[i]-sizeof(EVT_HDR_t);
+   size_t nWords=0, nTotal=fSize[i]-sizeof(EVT_HDR_t);
+   fRaw->read(reinterpret_cast<char *> (fData), nTotal);
    for (unsigned short ch=0; ch<nch; ch++) {
-      fRaw->read(reinterpret_cast<char *> (fData), nTotal/4);
       WF* wf = At(ch); // must have been initialized
       if (wf->pmt.id==-1) continue; // skip empty channel
       wf->Reset(); wf->freq=1*GHz; // reset waveform
 
-      int nWords=0, nsmpl=0, nzip=3;
-      while (nsmpl<nmax && nWords<int(nTotal/4/4)) {
+      int nsmpl=0, nzip;
+      while (nsmpl<nmax && nWords<nTotal/4) {
          nzip = fData[nWords]>>30 & 0x3;
-         if (nzip<1 || nzip>3)
-            Warning("ReadEvent",
-                  "evt %d: ch%u, nsmpl %d, nWords %d, nzip %d, smpl: %u %u %u",
-                  i, ch, nsmpl, nWords, nzip, fData[nWords]>>20 & 0x3ff,
-                  fData[nWords]>>10 & 0x3ff, fData[nWords] & 0x3ff);
          for (int i=0; i<nzip; i++)
             wf->smpl.push_back(float(fData[nWords]>>10*i & 0x3FF));
          nsmpl+=nzip;
          nWords++;
-      }
-      if (nsmpl!=nmax) {
-         Warning("ReadEvent", 
-               "nsmpl(%d) != nmax(%d). Set nmax to %d.", nsmpl, nmax, nsmpl);
-         nmax=nsmpl;
       }
    }
 }
