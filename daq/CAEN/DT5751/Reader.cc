@@ -196,62 +196,57 @@ void Reader::Scan(unsigned short ch)
    if (wf->pmt.id==-1) return; // skip empty channels
    if (wf->smpl.size()<96) return; // samples not enough
 
-   // calculate pedestal; ADC -> npe
+   // calculate pedestal; flip pulse; ADC -> npe
    Calibrate(ch, 96);
 
-   bool isPed=true;
-   int bgn=0, end=0; // beginning and end of a pulse
+   // When the waveform rises from pedestal, we should either create a new
+   // pulse or update the end of previous pulse, depending on whether the
+   // rising point is still in the tail of previous pulse
+   bool aboveThr, outOfPrevPls, prevSmplAboveThr=false;
    for (int i=0; i<nmax; i++) {
+      // check if above threshold
       int next1 = (i<nmax-1)?(i+1):(nmax-1); // index of next sample
       int next2 = (i<nmax-2)?(i+2):(nmax-1); // index of next next sample
       if (  wf->smpl[i]    >thr/wf->pmt.gain &&
             wf->smpl[next1]>thr/wf->pmt.gain &&
             wf->smpl[next2]>thr/wf->pmt.gain &&
-            next2>next1 && next1>i /*not the last sample*/) { // above threshold
-         if (isPed==false) continue; // previous sample also above threshold
-         if (end>0 && i-nbw<=end) continue; // overlap with previous pulse
+            next2>next1 && next1>i)  aboveThr=true;
+      else aboveThr=false;
 
-         // update previous pulse if any
-         for (int j=bgn; j<end; j++) {
-            if (wf->smpl[j]>wf->pls.back().h) {
-               wf->pls.back().h=wf->smpl[j];
-               wf->pls.back().ih=j;
-            }
-            if (wf->smpl[j]==wf->ped/wf->pmt.gain)
-               wf->pls.back().isSaturated=true;
-            wf->pls.back().npe+=wf->smpl[j];
+      // check previous pulse tentative end
+      if (wf->np>0) if (i==wf->pls.back().end) if (aboveThr) 
+         wf->pls.back().end=i+nfw<nmax?i+nfw:nmax-1;
+
+      // check if out of previous pulse
+      outOfPrevPls=true;
+      if (wf->np>0) if (i-nbw<wf->pls.back().end) outOfPrevPls=false;
+
+      if (aboveThr && !prevSmplAboveThr) {
+         if (outOfPrevPls) { // create a new pulse
+            Pulse pls;
+            pls.ithr=i;
+            pls.bgn=i-nbw<0?0:i-nbw;
+            pls.end=i+nfw<nmax?i+nfw:nmax-1; // tentative end
+            wf->pls.push_back(pls);
+            wf->np++;
+         } else  // update previous pulse tentative end
+            wf->pls.back().end=i+nfw<nmax?i+nfw:nmax-1;
+      }
+
+      prevSmplAboveThr=aboveThr; // flip flag for next sample after using it
+   }
+
+   // update pulses
+   for (int i=0; i<wf->np; i++) {
+      for (int j=wf->pls.at(i).bgn; j<wf->pls.at(i).end; j++) {
+         if (wf->smpl[j]>wf->pls.at(i).h) {
+            wf->pls.at(i).h=wf->smpl[j];
+            wf->pls.at(i).ih=j;
          }
-         if (end!=bgn) wf->pls.back().end=end;
-
-         // create a new pulse
-         Pulse pls;
-         pls.ithr=i;
-         pls.bgn=i-nbw<0?0:i-nbw;
-         wf->pls.push_back(pls);
-
-         bgn=pls.bgn;
-         isPed=false; // flip flag
-      } else { // below threshold
-         if (isPed) continue; // previous samples also below threshold
-         end=i+nfw<nmax?i+nfw:nmax-1;
-         isPed=true; // flip flag
+         if (wf->smpl[j]==wf->ped/wf->pmt.gain) wf->pls.at(i).isSaturated=true;
+         wf->pls.at(i).npe+=wf->smpl[j];
       }
    }
-   // if the last sample != pedestal, end needs to be updated
-   if (isPed==false) end=nmax-1;
-
-   // update last pulse
-   for (int j=bgn; j<end; j++) {
-      if (wf->smpl[j]>wf->pls.back().h) {
-         wf->pls.back().h=wf->smpl[j];
-         wf->pls.back().ih=j;
-      }
-      if (wf->smpl[j]==wf->ped/wf->pmt.gain)
-         wf->pls.back().isSaturated=true;
-      wf->pls.back().npe+=wf->smpl[j];
-   }
-   if (end!=bgn) wf->pls.back().end=end;
-   wf->np = wf->pls.size();
 }
 
 //------------------------------------------------------------------------------
