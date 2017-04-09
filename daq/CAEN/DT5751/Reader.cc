@@ -308,5 +308,6 @@ void Reader::Calibrate(unsigned short ch, unsigned short nSamples)
       wf->smpl[i] = (wf->ped - wf->smpl[i])/wf->pmt.gain;
       integral+=wf->smpl[i];
    }
+   wf->ns=nmax;
    wf->npe=integral;
 }
