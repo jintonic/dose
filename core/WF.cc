@@ -123,6 +123,7 @@ double WF::GetIntegral(short start, short end)
       Warning("GetIntegral", "start point must >= 0.");
       start=0;
    }
+   ns = smpl.size();
    if (end>=ns) {
       Warning("GetIntegral", "end point exceeds the total number of samples.");
       end=ns;
