@@ -42,7 +42,7 @@ else
       echo "sub run number should have only 6 digits"
     else
       subrun=`printf "%06d" $2`
-      $src/$name.exe $1 $2 $NICEDAT $3
+      $src/$name.exe $1 $subrun $NICEDAT $3
     fi
   else
     PrintUsage
