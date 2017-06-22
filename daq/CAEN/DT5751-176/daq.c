@@ -14,57 +14,69 @@ void ctrl_c_pressed(int sig) { interrupted = 1; }
 
 int main(int argc, char* argv[])
 {
-  // handle Ctrl-C
-  signal(SIGINT, ctrl_c_pressed); 
-
-  // connect to digitizer
-  int dt5751;
-  CAEN_DGTZ_ErrorCode err;
-  err = CAEN_DGTZ_OpenDigitizer(CAEN_DGTZ_USB, 0, 0, 0, &dt5751);
-  if (err) {
-    printf("Can't open DT5751! Abort. Error code %d \n", err);
+  if (argc<3) {
+    printf("Usage: ./daq.exe daq.cfg run_num [num_of_evt_to_be_taken]\n");
     return 1;
   }
+  signal(SIGINT, ctrl_c_pressed); // handle Ctrl-C
+
+  // connect to digitizer
+  int dt5751; CAEN_DGTZ_ErrorCode err = CAEN_DGTZ_Success;
+  err = CAEN_DGTZ_OpenDigitizer(CAEN_DGTZ_USB, 0, 0, 0, &dt5751);
+  if (err) { perror("Can't open DT5751!"); return 1; }
 
   // get board info
   CAEN_DGTZ_BoardInfo_t board;
   err = CAEN_DGTZ_GetInfo(dt5751, &board);
-  if (err) { 
-    printf("Can't get board info! Abort.\n");
-    CAEN_DGTZ_CloseDigitizer(dt5751);
-    return 1;
-  }
+  if (err) { printf("Can't get board info!\n"); goto close; }
   printf("Connected to %s\n", board.ModelName);
   printf("ROC FPGA Release is %s\n", board.ROC_FirmwareRel);
   printf("AMC FPGA Release is %s\n", board.AMC_FirmwareRel);
 
+  // get channel temperatures
+  uint32_t tC, ich;
+  printf("Temperature: ");
+  for (ich=0; ich<board.Channels; ich++) {
+    err = CAEN_DGTZ_ReadTemperature(dt5751, ich, &tC);
+    if (err) printf("N.A.(ch %d) ", ich);
+    else printf("%uC(ch %d) ", tC, ich);
+  }
+
+  // calibrate board
+  err = CAEN_DGTZ_Calibrate(dt5751);
+  if (err) { printf("Can't calibrate board!\n"); goto close; }
+
   // load configurations
-  printf("Parse %s\n", argv[1]);
+  printf("\n\nParse %s...\n", argv[1]);
   FILE *fcfg = fopen(argv[1],"r");
+  if (!fcfg) { perror("Error"); goto close; }
   RUN_CFG_t cfg;
   ParseConfigFile(fcfg, &cfg);
   fclose(fcfg);
+  if (err) goto close;
+  else printf("Done.\n\n");
 
   // global settings
+  uint16_t nEvtBLT=1024; // number of events for each block transfer
   err |= CAEN_DGTZ_Reset(dt5751);
   err |= CAEN_DGTZ_SetRecordLength(dt5751,cfg.ns);
   err |= CAEN_DGTZ_SetPostTriggerSize(dt5751,cfg.post);
-  err |= CAEN_DGTZ_SetMaxNumEventsBLT(dt5751,1024); // maximized
+  err |= CAEN_DGTZ_SetMaxNumEventsBLT(dt5751,nEvtBLT);
   err |= CAEN_DGTZ_SetAcquisitionMode(dt5751,CAEN_DGTZ_SW_CONTROLLED);
   err |= CAEN_DGTZ_SetChannelEnableMask(dt5751,cfg.mask);
-  if (cfg.trg==EXTERNAL_TTL) {
-    err |= CAEN_DGTZ_SetExtTriggerInputMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
-    err |= CAEN_DGTZ_SetIOLevel(dt5751,CAEN_DGTZ_IOLevel_TTL);
-  } else if (cfg.trg==EXTERNAL_NIM) {
-    err |= CAEN_DGTZ_SetExtTriggerInputMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
-    err |= CAEN_DGTZ_SetIOLevel(dt5751,CAEN_DGTZ_IOLevel_NIM);
-  } else if (cfg.trg==SOFTWARE_TRG)
-    err |= CAEN_DGTZ_SetSWTriggerMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
-  else
+  //if (cfg.trg==EXTERNAL_TTL) {
+  //  err |= CAEN_DGTZ_SetExtTriggerInputMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
+  //  err |= CAEN_DGTZ_SetIOLevel(dt5751,CAEN_DGTZ_IOLevel_TTL);
+  //} else if (cfg.trg==EXTERNAL_NIM) {
+  //  err |= CAEN_DGTZ_SetExtTriggerInputMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
+  //  err |= CAEN_DGTZ_SetIOLevel(dt5751,CAEN_DGTZ_IOLevel_NIM);
+  //} else if (cfg.trg==SOFTWARE_TRG)
+  //  err |= CAEN_DGTZ_SetSWTriggerMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
+  //else
     err |= CAEN_DGTZ_SetChannelSelfTrigger(
 	dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY,cfg.mask);
   // configure individual channels
-  int ich /* channel index */, Non=0 /* number of channels turned on */;
+  int Non=0 /* number of channels turned on */;
   for (ich=0; ich<Nch; ich++) {
     if ((cfg.mask & (1<<ich))>>ich) Non++;
     err |= CAEN_DGTZ_SetTriggerPolarity(
@@ -74,22 +86,14 @@ int main(int argc, char* argv[])
     err |= CAEN_DGTZ_SetChannelTriggerThreshold(
 	dt5751,ich,(uint32_t)cfg.thr[ich]);
   }
-  if (err) { 
-    printf("Can't configure board! Abort.\n");
-    CAEN_DGTZ_CloseDigitizer(dt5751);
-    return 1;
-  }
-  sleep(1);
+  if (err) { printf("Board configure error: %d\n", err); goto close; }
+  sleep(1); // wait till baseline get stable
 
   // allocate memory for data taking
   char *buffer = NULL; uint32_t bytes;
   err = CAEN_DGTZ_MallocReadoutBuffer(dt5751,&buffer,&bytes);
-  if (err) {
-    printf("Can't allocate memory! Abort.\n");
-    CAEN_DGTZ_CloseDigitizer(dt5751);
-    return 1;
-  }
-  printf("Allocated %d kB of memory\n",bytes/1024);
+  if (err) { printf("Can't allocate memory! Quit.\n"); goto close; }
+  else printf("\nAllocated %d kB of memory\n",bytes/1024);
 
   // open output file
   cfg.run=atoi(argv[2]);
@@ -105,12 +109,7 @@ int main(int argc, char* argv[])
   printf("Run %d starts at %d/%d/%d %d:%d:%d\n", cfg.run, lt.tm_year+1900,
       lt.tm_mon+1, lt.tm_mday, lt.tm_hour, lt.tm_min, lt.tm_sec);
   err = CAEN_DGTZ_SWStartAcquisition(dt5751);
-  if (err) {
-    printf("Can't start acquisition! Abort.\n");
-    CAEN_DGTZ_FreeReadoutBuffer(&buffer);
-    CAEN_DGTZ_CloseDigitizer(dt5751);
-    return 1;
-  }
+  if (err) { printf("Can't start acquisition! Quit.\n"); goto free; }
 
   // write run cfg
   ConfigRunTime(&cfg);
@@ -124,35 +123,33 @@ int main(int argc, char* argv[])
   int now, tpre = now = cfg.tsec*1000 + cfg.tus/1000, dt, runtime=0;
 
   // output loop
-  int nEvtTot=0, nNeeded = 16777216, nEvtIn5min=0; uint32_t nEvtInBuf;
+  int i, nEvtTot=0, nNeeded = 16777216, nEvtIn5min=0; uint32_t nEvtOnBoard;
   if (argc==4) nNeeded=atoi(argv[3]);
   uint32_t bsize, fsize=0;
-  while (nEvtTot<nNeeded && !interrupted) {
+  while (nEvtTot<=nNeeded && !interrupted) {
     // send software trigger to the board
     if (cfg.trg==SOFTWARE_TRG) CAEN_DGTZ_SendSWtrigger(dt5751);
 
     // read data from board
     CAEN_DGTZ_ReadMode_t rMode=CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT;
     err = CAEN_DGTZ_ReadData(dt5751,rMode,buffer,&bsize);
-    if (err) {
-      printf("Can't read data from board! Abort.\n");
-      break;
-    }
+    if (err) { printf("Can't read data from board! Abort.\n"); break; }
     fsize += bsize;
 
     // write data to file
-    int i;
-    CAEN_DGTZ_GetNumEvents(dt5751,buffer,bsize,&nEvtInBuf);
-    for (i=0; i<nEvtInBuf; i++) {
-      char *rawEvt = NULL;
-      CAEN_DGTZ_EventInfo_t eventInfo;
+    err = CAEN_DGTZ_GetNumEvents(dt5751,buffer,bsize,&nEvtOnBoard);
+    if (err) { printf("nEvtOnBoard: %d, err: %d\n", nEvtOnBoard, err); break; }
+    printf("nEvtOnBoard: %d\n", nEvtOnBoard);
+    for (i=0; i<nEvtOnBoard; i++) {
+      CAEN_DGTZ_EventInfo_t info; char *rawEvt = NULL;
+      err = CAEN_DGTZ_GetEventInfo(dt5751,buffer,bsize,i,&info,&rawEvt);
+      if (err) { printf("i: %d, err: %d\n", i, err); break; }
       CAEN_DGTZ_UINT16_EVENT_t *evt = NULL;
-      CAEN_DGTZ_GetEventInfo(dt5751,buffer,bsize,i,&eventInfo,&rawEvt);
       CAEN_DGTZ_DecodeEvent(dt5751,rawEvt,(void **)&evt);
 
       hdr.size=sizeof(EVENT_HEADER_t)+sizeof(uint16_t)*cfg.ns*Non;
-      hdr.evtCnt=eventInfo.EventCounter;
-      hdr.trgCnt=eventInfo.TriggerTimeTag;
+      hdr.evtCnt=info.EventCounter;
+      hdr.trgCnt=info.TriggerTimeTag;
       hdr.type=1; // a real event
       fwrite(&hdr,1,sizeof(EVENT_HEADER_t),output);
       for (ich=0; ich<Nch; ich++)
@@ -214,7 +211,9 @@ int main(int argc, char* argv[])
   printf("Run %d stops at %d/%d/%d %d:%d:%d\n", cfg.run, lt.tm_year+1900,
       lt.tm_mon+1, lt.tm_mday, lt.tm_hour, lt.tm_min, lt.tm_sec);
   CAEN_DGTZ_SWStopAcquisition(dt5751);
+free:
   CAEN_DGTZ_FreeReadoutBuffer(&buffer);
+close:
   CAEN_DGTZ_CloseDigitizer(dt5751);
 
   return 0;

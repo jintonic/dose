@@ -48,36 +48,51 @@ int ParseConfigFile(FILE *fcfg, RUN_CFG_t *cfg)
       }
       continue;
     }
+    printf(" %s: ",str);
 
     // Acquisition Record Length (number of samples)
     if (strstr(str, "RECORD_LENGTH")!=NULL) {
       read = fscanf(fcfg, "%d", &cfg->ns);
+      printf("%d\n", cfg->ns);
       continue;
     }
 
     // Post Trigger (percent of the acquisition window)
     if (strstr(str, "POST_TRIGGER")!=NULL) {
       read = fscanf(fcfg, "%hhu", &cfg->post);
+      printf("%d\n", cfg->post);
       continue;
     }
 
     // DC offset
     if (!strcmp(str, "DC_OFFSET")) {
       read = fscanf(fcfg, "%d", &val);
-      if (ch == -1)
-	for(i=0; i<Nch; i++) cfg->offset[i] = val;
-      else
+      if (ch == -1) {
+	for(i=0; i<Nch; i++) {
+	  cfg->offset[i] = val;
+	  printf("%d(ch %d) ", cfg->offset[i], i);
+	}
+	printf("\n");
+      } else {
 	cfg->offset[ch] = val;
+	printf("%d(ch %d)\n", cfg->offset[ch], ch);
+      }
       continue;
     }
 
     // Threshold
     if (strstr(str, "TRIGGER_THRESHOLD")!=NULL) {
       read = fscanf(fcfg, "%d", &val);
-      if (ch == -1)
-	for(i=0; i<Nch; i++) cfg->thr[i] = val;
-      else
+      if (ch == -1) {
+	for(i=0; i<Nch; i++) {
+	  cfg->thr[i] = val;
+	  printf("%d(ch %d) ", cfg->thr[i], i);
+	}
+	printf("\n");
+      } else {
 	cfg->thr[ch] = val;
+	printf("%d\n", cfg->thr[ch]);
+      }
       continue;
     }
 
@@ -95,9 +110,10 @@ int ParseConfigFile(FILE *fcfg, RUN_CFG_t *cfg)
 	tm = EXTERNAL_TTL;
       else {
 	printf("%s: Invalid Parameter\n", str);
-	continue;
+	return 1;
       }
       cfg->trg = tm;
+      printf("%d\n", cfg->trg);
       continue;
     }
 
@@ -117,10 +133,16 @@ int ParseConfigFile(FILE *fcfg, RUN_CFG_t *cfg)
 	printf("%s: Invalid Parameter\n", str);
 	continue;
       }
-      if (ch == -1)
-	for(i=0; i<Nch; i++) cfg->mode[i] = tm;
-      else
+      if (ch == -1) {
+	for(i=0; i<Nch; i++) {
+	  cfg->mode[i] = tm;
+	  printf("%d(ch %d) ", cfg->mode[i], i);
+	}
+	printf("\n");
+      } else {
 	cfg->mode[ch] = tm;
+	printf("%d(ch %d)\n", cfg->mode[ch], ch);
+      }
       continue;
     }
 
@@ -128,24 +150,21 @@ int ParseConfigFile(FILE *fcfg, RUN_CFG_t *cfg)
     if (strstr(str, "ENABLE_INPUT")!=NULL) {
       read = fscanf(fcfg, "%s", str1);
       if (strcmp(str1, "YES")==0) {
-	if (ch == -1)
-	  cfg->mask = 0xF;
-	else
-	  cfg->mask |= (1 << ch);
-	continue;
+	if (ch == -1) cfg->mask = 0xF;
+	else cfg->mask |= (1 << ch);
       } else if (strcmp(str1, "NO")==0) {
-	if (ch == -1)
-	  cfg->mask = 0x0;
-	else
-	  cfg->mask &= ~(1 << ch);
-	continue;
+	if (ch == -1) cfg->mask = 0x0;
+	else cfg->mask &= ~(1 << ch);
       } else {
 	printf("%s: invalid option\n", str);
+	return 1;
       }
+      for (i=Nch; i-->0;) printf("%d",cfg->mask>>i&1); printf("\n");
       continue;
     }
 
     printf("%s: invalid setting\n", str);
+    return 1;
   }
   return 0;
 }
