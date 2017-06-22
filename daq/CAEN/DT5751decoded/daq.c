@@ -64,15 +64,15 @@ int main(int argc, char* argv[])
   err |= CAEN_DGTZ_SetMaxNumEventsBLT(dt5751,nEvtBLT);
   err |= CAEN_DGTZ_SetAcquisitionMode(dt5751,CAEN_DGTZ_SW_CONTROLLED);
   err |= CAEN_DGTZ_SetChannelEnableMask(dt5751,cfg.mask);
-  //if (cfg.trg==EXTERNAL_TTL) {
-  //  err |= CAEN_DGTZ_SetExtTriggerInputMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
-  //  err |= CAEN_DGTZ_SetIOLevel(dt5751,CAEN_DGTZ_IOLevel_TTL);
-  //} else if (cfg.trg==EXTERNAL_NIM) {
-  //  err |= CAEN_DGTZ_SetExtTriggerInputMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
-  //  err |= CAEN_DGTZ_SetIOLevel(dt5751,CAEN_DGTZ_IOLevel_NIM);
-  //} else if (cfg.trg==SOFTWARE_TRG)
-  //  err |= CAEN_DGTZ_SetSWTriggerMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
-  //else
+  if (cfg.trg==EXTERNAL_TTL) {
+    err |= CAEN_DGTZ_SetExtTriggerInputMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
+    err |= CAEN_DGTZ_SetIOLevel(dt5751,CAEN_DGTZ_IOLevel_TTL);
+  } else if (cfg.trg==EXTERNAL_NIM) {
+    err |= CAEN_DGTZ_SetExtTriggerInputMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
+    err |= CAEN_DGTZ_SetIOLevel(dt5751,CAEN_DGTZ_IOLevel_NIM);
+  } else if (cfg.trg==SOFTWARE_TRG)
+    err |= CAEN_DGTZ_SetSWTriggerMode(dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY);
+  else
     err |= CAEN_DGTZ_SetChannelSelfTrigger(
 	dt5751,CAEN_DGTZ_TRGMODE_ACQ_ONLY,cfg.mask);
   // configure individual channels
