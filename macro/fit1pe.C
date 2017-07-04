@@ -40,7 +40,15 @@ void Create1PEdistr(int run, int fixedMin, int fixedMax)
       } else {
          min=fixedMin; max=fixedMax;
       }
-
+      // skip events with fluctuating baseline
+      double sum=0, sum1=0, sum2=0; int nb=10;
+      for (int j=0; j<nb; j++) {
+         sum1+=evt->At(0)->smpl[j];
+         sum2+=evt->At(0)->smpl[evt->nmax-1-j];
+      }
+      sum=sum2-sum1;
+      if (abs(sum)>5.7) continue;
+      // integrate over [min, max)
       double total=0;
       for (int j=min; j<max; j++) {
          total+=evt->At(0)->smpl[j];
@@ -70,6 +78,9 @@ void Fit1PEdistr(int run)
    f->SetParameter(2,4);
    f->SetParameter(4,40);
    f->SetParameter(5,10);
+   f->SetParLimits(5, 6, 16);
+   f->SetParLimits(6, 0, 500);
+   f->SetParLimits(7, 0, 500);
    hpe->Fit(f);
 
    TF1 *baseline = new TF1("baseline","gaus",-50,50);
