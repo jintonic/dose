@@ -19,7 +19,7 @@ void Create1PEdistr(int run, int fixedMin, int fixedMax)
    t->GetEntry(1);
 
    TFile *output = new TFile(Form("%d.root",run),"recreate");
-   TH1D *hpe = new TH1D("hpe","",200,-50,150);
+   TH1D *hpe = new TH1D("hpe","",250,-50,200);
    TH1D *hmin = new TH1D("hmin","",evt->nmax,0,evt->nmax);
    TH1D *hmax = new TH1D("hmax","",evt->nmax,0,evt->nmax);
    TH1D *hrange = new TH1D("hrange","",100,0,100);
@@ -41,18 +41,17 @@ void Create1PEdistr(int run, int fixedMin, int fixedMax)
          min=fixedMin; max=fixedMax;
       }
       // skip events with fluctuating baseline
-      double sum=0, sum1=0, sum2=0; int nb=10;
+      double sum=0, beg=0, end=0, mid=0; int nb=10;
       for (int j=0; j<nb; j++) {
-         sum1+=evt->At(0)->smpl[j];
-         sum2+=evt->At(0)->smpl[evt->nmax-1-j];
+         beg+=evt->At(0)->smpl[j]; // sum of nb smpls at the beginning of a wf
+         end+=evt->At(0)->smpl[evt->nmax-1-j]; // sum of nb smpls at the end of a wf
       }
-      sum=sum2-sum1;
-      if (abs(sum)>5.7) continue;
+      for (int j=max; j<nb; j++) mid+=evt->At(0)->smpl[j];
+      sum=end-beg;
+      if (abs(end)>2 || abs(beg)>2 || abs(mid)>2 || abs(sum)>5.7) continue;
       // integrate over [min, max)
       double total=0;
-      for (int j=min; j<max; j++) {
-         total+=evt->At(0)->smpl[j];
-      }
+      for (int j=min; j<max; j++) total+=evt->At(0)->smpl[j];
       hpe->Fill(total);
    }
    output->Write();
@@ -76,9 +75,9 @@ void Fit1PEdistr(int run)
    f->SetParNames("n0", "m0", "s0", "norm", "mean", "sigma", "n2", "n3");
    f->SetParameter(1,0);
    f->SetParameter(2,4);
-   f->SetParameter(4,40);
+   f->SetParameter(4,50);
    f->SetParameter(5,10);
-   f->SetParLimits(5, 6, 16);
+   f->SetParLimits(5, 6, 26);
    f->SetParLimits(6, 0, 500);
    f->SetParLimits(7, 0, 500);
    hpe->Fit(f);
@@ -88,7 +87,7 @@ void Fit1PEdistr(int run)
    baseline->SetLineColor(kRed);
    baseline->Draw("same");
 
-   TF1 *first = new TF1("first","gaus",-50,100);
+   TF1 *first = new TF1("first","gaus",-50,120);
    first->SetParameters(f->GetParameter(3),
          f->GetParameter(4), f->GetParameter(5));
    first->SetLineColor(kBlue);
@@ -117,7 +116,7 @@ void DrawWFs(int run)
 {
    TChain *t = new TChain("t");
    t->Add(Form("%s/%04d00/run_%06d.000001.root",folder,run/100,run));
-   t->Draw("wf[0].smpl:Iteration$","","l",250,1);
+   t->Draw("wf[0].smpl:Iteration$","abs(wf[0].npe)<100","l",250,1);
    TText *text = new TText(.8,.8,Form("%d",run));
    text->SetNDC();
    text->Draw();
