@@ -91,6 +91,7 @@ while [ $run -le $max ]; do
     cd $NICEDAT/$dir
     s6d=`echo $file | awk -F. '{print $NF}'`
     sub=`echo $file | awk -F. '{printf("%d",$NF)}'`
+    rm -f $file.log
     qsub -N b2r$run.$sub -V -cwd -o $file.log -e $file.log -b y $exe $run $sub $NICEDAT $threshold 
   done
   # next run
