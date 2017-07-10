@@ -3175,7 +3175,7 @@ let L242 = 1
 leftstring M242 = " thr: 50 ADC, trg rate: 180 Hz"
 let A243 = 243
 let B243 = 1498518551
-let C243 = 4217294771
+let C243 = 1498518981
 rightstring D243 = "CsI"
 rightstring E243 = "none"
 rightstring F243 = "none"
@@ -3201,7 +3201,7 @@ let L244 = 5
 leftstring M244 = " 1 PE, cold, 1.2 kV"
 let A245 = 245
 let B245 = 1498521899
-let C245 = 4255083482
+let C245 = 1498674027
 rightstring D245 = "CsI"
 rightstring E245 = "none"
 rightstring F245 = "AmBe"
@@ -3277,4 +3277,4 @@ let J250 = 1500
 rightstring K250 = "PMT"
 let L250 = 1
 leftstring M250 = " neutron calibration"
-goto L225 B189
+goto C243 A189
