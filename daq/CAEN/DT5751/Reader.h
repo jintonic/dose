@@ -12,7 +12,7 @@
 class Reader: public NICE::WFs, public NICE::Logger
 {
    private:
-      ifstream *fRaw;///< pointer to binary file
+      std::ifstream *fRaw;///< pointer to binary file
       int fNttt;     ///< number of overwrites of trigger time tag
       int fNwarnings;///< number of times a warning message is printed
       TString fPath; ///< path to binary file
