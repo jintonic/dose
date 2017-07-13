@@ -4,7 +4,6 @@ using namespace std;
 #include <TClass.h>
 
 #include "Pulse.h"
-
 using namespace NICE;
 
 Pulse::Pulse() : TObject(), bgn(0), end(0), ithr(0), ih(0), h(0), npe(0)
