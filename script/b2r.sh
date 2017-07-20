@@ -10,6 +10,10 @@ min=${min#*run_}
 max=${max#*run_}
 min=`echo ${min:0:6} | bc`
 max=`echo ${max:0:6} | bc`
+if [ X$min = X ]; then
+  echo "Minimal run number cannot be determined automaticall"
+  read -e -p "Please specify manually: " min
+fi
 echo "Run ranges from $min to $max"
 
 # skip old runs unless specified otherwise

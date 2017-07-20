@@ -75,7 +75,7 @@ void Fit1PEdistr(int run)
    f->SetParNames("n0", "m0", "s0", "norm", "mean", "sigma", "n2", "n3");
    f->SetParameter(1,0);
    f->SetParameter(2,4);
-   f->SetParameter(4,50);
+   f->SetParameter(4,30);
    f->SetParameter(5,10);
    f->SetParLimits(5, 6, 26);
    f->SetParLimits(6, 0, 500);
@@ -105,7 +105,7 @@ void Fit1PEdistr(int run)
    third->SetLineColor(kMagenta);
    third->Draw("same");
 
-   can->Print(Form("1pe%d.ps",run));
+   can->Print(Form("1pe%d.png",run));
 }
 
 //______________________________________________________________________________
@@ -120,7 +120,7 @@ void DrawWFs(int run)
    TText *text = new TText(.8,.8,Form("%d",run));
    text->SetNDC();
    text->Draw();
-   gPad->Print(Form("wf%d.ps",run));
+   gPad->Print(Form("wf%d.png",run));
 }
 
 // search the range of the 1st pulse above threshold

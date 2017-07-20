@@ -35,6 +35,7 @@ while [ $run -le $max ]; do
     fi
     # submit jobs for necessary runs
     sub=`echo $file | awk -F. '{printf("%d",$NF)}'`
+    rm -f $file.idx
     qsub -N idx$run.$sub -V -cwd -o $file.idx -e run_${r6d}_`printf "%06d" $sub`.log -b y $exe $run $sub $NICEDAT
   done
   # next run
