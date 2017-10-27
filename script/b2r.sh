@@ -108,16 +108,12 @@ done
 echo "Give write permission to root files for run [$min, $max]..."
 run=$min
 while [ $run -le $max ]; do
-  # loop over sub runs
   r6d=`printf "%06d" $run`
   dir=${r6d:0:4}00
-  for file in `ls -1 $NICEDAT/$dir/run_$r6d.??????.root`; do
+  for file in `ls -1 $NICEDAT/$dir/run_$r6d.??????.root 2>/dev/null`; do
     chmod g+w $file
-    if [ -f ${file%root}log ]; then 
-      chmod g+w ${file%root}log
-    fi
+    if [ -f ${file%root}log ]; then chmod g+w ${file%root}log; fi
   done
-  # next run
   run=$((run+1))
 done
 echo "Done."
