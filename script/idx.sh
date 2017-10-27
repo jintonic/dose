@@ -4,7 +4,7 @@
 # figure out valid range of runs, [min, max]
 dir0=`ls -1 $NICEDAT | egrep '^[0-9]+$' | head -1`
 dir1=`ls -1 $NICEDAT | egrep '^[0-9]+$' | tail -1`
-min=`ls -1 $NICEDAT/$dir0/run_??????.?????? | head -1`
+min=`ls -1 $NICEDAT/$dir0/run_??????.* | head -1`
 max=`ls -1 $NICEDAT/$dir1/run_??????.?????? | tail -1`
 min=${min#*run_}
 max=${max#*run_}
