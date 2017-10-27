@@ -4,16 +4,12 @@
 # figure out valid range of runs, [min, max]
 dir0=`ls -1 $NICEDAT | egrep '^[0-9]+$' | head -1`
 dir1=`ls -1 $NICEDAT | egrep '^[0-9]+$' | tail -1`
-min=`ls -1 $NICEDAT/$dir0/run_??????.?????? | head -1`
+min=`ls -1 $NICEDAT/$dir0/run_??????.* | head -1`
 max=`ls -1 $NICEDAT/$dir1/run_??????.?????? | tail -1`
 min=${min#*run_}
 max=${max#*run_}
 min=`echo ${min:0:6} | bc`
 max=`echo ${max:0:6} | bc`
-if [ X$min = X ]; then
-  echo "Minimal run number cannot be determined automaticall"
-  read -e -p "Please specify manually: " min
-fi
 echo "Run ranges from $min to $max"
 
 # skip old runs unless specified otherwise
@@ -108,3 +104,20 @@ while true; do
   if [ $njobs -eq 0 ]; then break; fi
   sleep 3
 done
+
+echo "Give write permission to root files for run [$min, $max]..."
+run=$min
+while [ $run -le $max ]; do
+  # loop over sub runs
+  r6d=`printf "%06d" $run`
+  dir=${r6d:0:4}00
+  for file in `ls -1 $NICEDAT/$dir/run_$r6d.??????.root`; do
+    chmod g+w $file
+    if [ -f ${file%root}log ]; then 
+      chmod g+w ${file%root}log
+    fi
+  done
+  # next run
+  run=$((run+1))
+done
+echo "Done."
