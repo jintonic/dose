@@ -16,6 +16,7 @@ echo "Run ranges from $min to $max"
 min=254
 read -p "Please set minimal run number (<Enter> to accept default: $min): " run
 if [ X$run = X ]; then run=$min; fi
+first=$run # save for chmod loop in the end of script
 
 echo "Loop over run [$run,  $max]..."
 while [ $run -le $max ]; do
@@ -48,3 +49,23 @@ while true; do
   if [ $njobs -eq 0 ]; then break; fi
   sleep 3
 done
+
+echo -n "Give write permission to rdlab group for run [$first,  $max]..."
+while [ $first -le $max ]; do
+  # loop over sub runs
+  r6d=`printf "%06d" $first`
+  dir=${r6d:0:4}00
+  for file in `ls -1 $NICEDAT/$dir/run_$r6d.??????`; do
+    # skip existing, valid idx files
+    if [ -f $file.idx ]; then
+      size=`tail -1 $file.idx | awk '{print $2}'`
+      if [ X$size != X ]; then
+	if [ $size -eq 68 -o $size -eq 60 ]; then continue; fi
+      fi
+    fi
+    chmod g+w $file.idx
+  done
+  # next run
+  first=$((first+1))
+done
+echo "Done."
