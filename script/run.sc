@@ -3509,4 +3509,17 @@ let J268 = 1200
 rightstring K268 = "PMT"
 let L268 = 1
 leftstring M268 = " Co60"
-goto M252 C233
+let A269 = 269
+let B269 = 1521151733
+let C269 = 1521154215
+rightstring D269 = "CsI"
+rightstring E269 = "none"
+rightstring F269 = "none"
+let G269 = 18.1
+rightstring H269 = "N2"
+rightstring I269 = "R11065"
+let J269 = 1200
+rightstring K269 = "PMT"
+let L269 = 1
+leftstring M269 = " K40 from bg"
+goto M269 B233
