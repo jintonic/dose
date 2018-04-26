@@ -20,6 +20,11 @@ using namespace NICE;
 void b2r(int run, int sub=1, const char* dir=".", unsigned short software_threshold=3)
 {
    Reader input(run, sub, dir);
+   WFs::Class()->IgnoreTObjectStreamer();
+   WF::Class()->IgnoreTObjectStreamer();
+   PMT::Class()->IgnoreTObjectStreamer();
+   Pulse::Class()->IgnoreTObjectStreamer();
+
    input.thr=software_threshold;
    TFile output(Form("%s.root",input.GetFile()),"recreate");
    TTree t("t",Form("events in run %d, sub run %d", run, sub));

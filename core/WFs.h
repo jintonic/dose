@@ -72,7 +72,8 @@ class NICE::WFs : public TObject
       TClonesArray wf; ///< waveform array
 
    public:
-      WFs(int run=999999);
+      WFs(int run=999999) : TObject(), run(run), sub(-1), id(-1), cnt(-1),
+      t(-1), t0(-1), nch(8), nmax(0), nfw(0), nbw(0), thr(0) {}
       virtual ~WFs() {};
 
       void Initialize(const char *db="/path/to/pmt");

@@ -48,7 +48,7 @@ class NICE::PMT: public TObject
        */
       double gain; // mean of 1 PE distribution
 
-      PMT();
+      PMT(): TObject(), st(kUnknown), id(-1), ch(-1), dt(0), gain(1) {};
       virtual ~PMT() {};
 
       void SetStatus(const char *status);

@@ -5,9 +5,6 @@
 #include "WF.h"
 using namespace NICE;
 
-WF::WF(): TObject(), freq(0), ped(0), prms(0), ctrg(0), ns(0), np(0), npe(0)
-{ Pulse::Class()->IgnoreTObjectStreamer(); }
-
 //------------------------------------------------------------------------------
 
 bool WF::IsSimilarTo(const WF& other) const

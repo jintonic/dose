@@ -31,7 +31,7 @@ class NICE::WF : public TObject
       double npe; ///< total number of photoelectrons
       PMT pmt; ///< information of related PMT
 
-      WF();
+      WF(): TObject(),freq(0),ped(0),prms(0),ctrg(0),ns(0),np(0),npe(0){};
       virtual ~WF() {};
 
       bool IsSimilarTo(const WF& other) const;
