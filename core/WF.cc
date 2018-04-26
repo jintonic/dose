@@ -5,8 +5,8 @@
 #include "WF.h"
 using namespace NICE;
 
-WF::WF(): freq(0), ped(0), prms(0), ctrg(0), ns(0), np(0), npe(0)
-{ Class()->IgnoreTObjectStreamer(); }
+WF::WF(): TObject(), freq(0), ped(0), prms(0), ctrg(0), ns(0), np(0), npe(0)
+{ Pulse::Class()->IgnoreTObjectStreamer(); }
 
 //------------------------------------------------------------------------------
 
