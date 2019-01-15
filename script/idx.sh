@@ -13,7 +13,7 @@ max=`echo ${max:0:6} | bc`
 echo "Run ranges from $min to $max"
 
 # skip old runs unless specified otherwise
-min=297
+min=314
 read -p "Please set minimal run number (<Enter> to accept default: $min): " run
 if [ X$run = X ]; then run=$min; fi
 first=$run # save for chmod loop in the end of script
