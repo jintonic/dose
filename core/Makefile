@@ -1,8 +1,12 @@
 # Dependence
-UNIC=$(HOME)
+ifeq ($(UNIC),)
+  UNIC=$(HOME)
+endif
 
 # Configurable variables
-PREFIX=$(HOME)
+ifeq ($(PREFIX),)
+  PREFIX=$(HOME)
+endif
 LIBNAME=NICE
 
 # Define basic variables
