@@ -1,10 +1,13 @@
 # dependences
-UNIC = $(HOME)
-NICE = $(HOME)
-DAQ = $(HOME)/github/daq
+ifeq ($(PREFIX),)
+  PREFIX=$(HOME)
+endif
+UNIC = $(PREFIX)
+NICE = $(PREFIX)
+DAQ = $(PREFIX)
 
 LIBS = -L$(NICE)/lib -lNICE
-CXXFLAGS = -Wall -O2 -I$(UNIC)/include -I$(NICE)/include -I$(DAQ)
+CXXFLAGS = -Wall -O2 -I$(UNIC)/include -I$(NICE)/include -I$(DAQ)/include
 
 # check if root-config exists
 ifneq ($(shell hash root-config 2> /dev/null && echo true), true)
