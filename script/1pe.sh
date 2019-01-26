@@ -79,8 +79,8 @@ for run in $runs; do
 done
 
 while true; do
-  qstat
-  njobs=`qstat | egrep " pe[0-9]+ " | wc -l`
+  squeue -u $USER
+  njobs=`squeue -u $USER | egrep " pe[0-9]+ " | wc -l`
   if [ $njobs -eq 0 ]; then break; fi
   sleep 3
 done
