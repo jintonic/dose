@@ -99,8 +99,8 @@ while [ $run -le $max ]; do
 done
 
 while true; do
-  qstat
-  njobs=`qstat | egrep " b2r[0-9]+." | wc -l`
+  squeue -u $USER
+  njobs=`squeue -u $USER | egrep " b2r[0-9]+." | wc -l`
   if [ $njobs -eq 0 ]; then break; fi
   sleep 3
 done
