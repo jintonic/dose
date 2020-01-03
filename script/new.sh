@@ -14,7 +14,7 @@ if [ $min -eq $max ]; then echo "Nothing to update, quit."; exit; fi
 run=$min
 while [ $run -lt $max ]; do
   run=$((run+1))
-  #echo add run $run start and end times to run.sc
+  echo add run $run start and end times to run.sc
 
   # check how many sub runs are there
   r6d=`printf "%06d" $run`
@@ -34,8 +34,4 @@ while [ $run -lt $max ]; do
   echo let A$run = $run  >> $NICESYS/script/run.sc
   echo let B$run = $tmin >> $NICESYS/script/run.sc
   echo let C$run = $tmax >> $NICESYS/script/run.sc
-
-  echo -n $run
-  echo $tmin | awk '{printf(" %s ", strftime("%m-%d %T",$1))}'
-  echo "$(($tmax-$tmin))"
 done
