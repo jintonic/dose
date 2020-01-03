@@ -34,4 +34,7 @@ while [ $run -lt $max ]; do
   echo let A$run = $run  >> $NICESYS/script/run.sc
   echo let B$run = $tmin >> $NICESYS/script/run.sc
   echo let C$run = $tmax >> $NICESYS/script/run.sc
+
+  echo $tmin | awk '{printf("%s ", strftime("%m-%d %T",$1))}'
+  echo "$(($tmax-$tmin))"
 done
