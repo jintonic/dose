@@ -4,8 +4,8 @@ ifeq ($(UNIC),)
 endif
 
 # Configurable variables
-ifeq ($(PREFIX),)
-  PREFIX=$(HOME)
+ifeq ($(prefix),)
+  prefix=$(HOME)
 endif
 LIBNAME=NICE
 
@@ -57,11 +57,11 @@ endif
 # before "make all", make will include all other makefiles specified
 # by the include command
 install: $(ROOTMAP)
-	mkdir -p $(PREFIX)/lib/
-	cp lib$(LIBNAME).* $(PREFIX)/lib/
-	if [ -f *.pcm ]; then cp *.pcm $(PREFIX)/lib/; fi
-	mkdir -p $(PREFIX)/include/$(LIBNAME)/
-	cp *.h $(PREFIX)/include/$(LIBNAME)/
+	mkdir -p $(prefix)/lib/
+	cp lib$(LIBNAME).* $(prefix)/lib/
+	if [ -f *.pcm ]; then cp *.pcm $(prefix)/lib/; fi
+	mkdir -p $(prefix)/include/$(LIBNAME)/
+	cp *.h $(prefix)/include/$(LIBNAME)/
 
 # include *.d files, which are makefiles defining dependencies between files
 ifeq ($(filter info clean tags,$(MAKECMDGOALS)),)
@@ -127,7 +127,7 @@ tags:
 	ctags --c-kinds=+p $(HEADERS) $(SOURCES)
 
 uninstall:
-	$(RM) -r $(PREFIX)/include/$(LIBNAME)
-	$(RM) $(PREFIX)/lib/*$(LIBNAME)*
+	$(RM) -r $(prefix)/include/$(LIBNAME)
+	$(RM) $(prefix)/lib/*$(LIBNAME)*
 
 .PHONY: info tags clean install uninstall
