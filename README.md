@@ -2,7 +2,7 @@ NICE - NaI/CsI Cryogenic Experiment
 
 # script
 
-- *idx.sh*: index all runs in $NICEDAT
+- *idx.sh*: index all runs in \$NICEDAT
 - *b2r.sh*: convert all runs from binary to ROOT format
 - *run.sc*: list of runs in a spreadsheet
 - *new.sh*: add new runs to run.sc
@@ -10,3 +10,12 @@ NICE - NaI/CsI Cryogenic Experiment
 - *1pe.sh*: analyze all 1 PE runs
 - *R11065.1pe*: 1 PE database of PMT R11065
 - *1pe.gnu*: visualize a 1 PE database
+
+# Get started
+
+```sh
+cd core
+make prefix=/path/to/installation/folder
+```
+
+and follow instructions printed out by make
