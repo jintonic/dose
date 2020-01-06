@@ -1,10 +1,10 @@
 # dependences
-ifeq ($(PREFIX),)
-  PREFIX=$(HOME)
+ifeq ($(prefix),)
+  prefix=$(HOME)
 endif
-UNIC = $(PREFIX)
-NICE = $(PREFIX)
-DAQ = $(PREFIX)
+UNIC = $(prefix)
+NICE = $(prefix)
+DAQ = $(prefix)
 
 LIBS = -L$(NICE)/lib -lNICE
 CXXFLAGS = -Wall -O2 -I$(UNIC)/include -I$(NICE)/include -I$(DAQ)/include
