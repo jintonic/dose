@@ -111,6 +111,7 @@ while [ $run -le $max ]; do
   r6d=`printf "%06d" $run`
   dir=${r6d:0:4}00
   for file in `ls -1 $NICEDAT/$dir/run_$r6d.??????.root 2>/dev/null`; do
+    chgrp "liu_lab@usd.local" $file
     chmod g+w $file
     if [ -f ${file%root}log ]; then chmod g+w ${file%root}log; fi
   done

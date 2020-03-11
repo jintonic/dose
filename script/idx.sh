@@ -13,7 +13,7 @@ max=`echo ${max:0:6} | bc`
 echo "Run ranges from $min to $max"
 
 # skip old runs unless specified otherwise
-min=382
+min=484
 read -p "Please set minimal run number (<Enter> to accept default: $min): " run
 if [ X$run = X ]; then run=$min; fi
 first=$run # save for chmod loop in the end of script
@@ -55,6 +55,7 @@ while [ $first -le $max ]; do
   r6d=`printf "%06d" $first`
   dir=${r6d:0:4}00
   for file in `ls -1 $NICEDAT/$dir/run_$r6d.??????.idx 2>/dev/null`; do
+    chgrp "liu_lab@usd.local" $file
     chmod g+w $file
   done
   first=$((first+1))
