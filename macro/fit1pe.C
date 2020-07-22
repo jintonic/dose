@@ -1,12 +1,12 @@
 // search the range of the 1st pulse above threshold
-void SearchPulseAboveThreshold(double threshold)
+void SearchPulseAboveThreshold(double threshold, int channel)
 {
    NICE::WFs *evt = new NICE::WFs; // data structure
    int min=99999, max=0; // integration range (will be updated automatically)
    for (int i=0; i<evt->nmax-2; i++) {
-      if (  evt->At(0)->smpl[i]  >threshold && 
-            evt->At(0)->smpl[i+1]>threshold && 
-            evt->At(0)->smpl[i+2]>threshold) {
+      if (  evt->At(channel)->smpl[i]  >threshold && 
+            evt->At(channel)->smpl[i+1]>threshold && 
+            evt->At(channel)->smpl[i+2]>threshold) {
          min=i;
          break;
       }
@@ -14,7 +14,7 @@ void SearchPulseAboveThreshold(double threshold)
    if (min==99999) min=0;
 
    for (int i=min; i<evt->nmax; i++) {
-      if (evt->At(0)->smpl[i]<threshold) {
+      if (evt->At(channel)->smpl[i]<threshold) {
          max=i;
          break;
       }
@@ -27,7 +27,7 @@ void SearchPulseAboveThreshold(double threshold)
    if (max-min<50) max=min+50;
    if (max>evt->nmax) max=evt->nmax;
 }
-void Create1PEdistr(int run, int fixedMin, int fixedMax)
+void Create1PEdistr(int run, int fixedMin, int fixedMax, int channel)
 {
    NICE::WFs *evt = new NICE::WFs; // data structure
    const char *folder = gSystem->Getenv("NICEDAT"); // data location
@@ -50,11 +50,11 @@ void Create1PEdistr(int run, int fixedMin, int fixedMax)
    for(int i=0; i<nevt; i++) {
       if (i%5000==0) cout<<"now event "<<i<<endl;
       t->GetEntry(i);
-      if (evt->At(0)->ped==0) continue;
+      if (evt->At(channel)->ped==0) continue;
       // search for proper range for integration
       if (fixedMin==0 && fixedMax==0) {
          double threshold=2;
-         SearchPulseAboveThreshold(threshold);
+         SearchPulseAboveThreshold(threshold, channel);
          hmin->Fill(min);
          hmax->Fill(max);
          hrange->Fill(max-min);
@@ -64,15 +64,15 @@ void Create1PEdistr(int run, int fixedMin, int fixedMax)
       // skip events with fluctuating baseline
       double sum=0, beg=0, end=0, mid=0; int nb=10;
       for (int j=0; j<nb; j++) {
-         beg+=evt->At(0)->smpl[j]; // sum of nb smpls at the beginning of a wf
-         end+=evt->At(0)->smpl[evt->nmax-1-j]; // sum of nb smpls at the end of a wf
+         beg+=evt->At(channel)->smpl[j]; // sum of nb smpls at the beginning of a wf
+         end+=evt->At(channel)->smpl[evt->nmax-1-j]; // sum of nb smpls at the end of a wf
       }
-      for (int j=max; j<nb; j++) mid+=evt->At(0)->smpl[j];
+      for (int j=max; j<nb; j++) mid+=evt->At(channel)->smpl[j];
       sum=end-beg;
       if (abs(end)>2 || abs(beg)>2 || abs(mid)>2 || abs(sum)>5.7) continue;
       // integrate over [min, max)
       double total=0;
-      for (int j=min; j<max; j++) total+=evt->At(0)->smpl[j];
+      for (int j=min; j<max; j++) total+=evt->At(channel)->smpl[j];
       hpe->Fill(total);
    }
    output->Write();
@@ -133,24 +133,22 @@ void Fit1PEdistr(int run)
 // different ways to specify the integration range [min, max]
 
 // overlap many WFs in one plot to check location of 1 PE pulses by eyes
-void DrawWFs(int run)
+void DrawWFs(int run, int channel)
 {
    TChain *t = new TChain("t");
    const char *folder = gSystem->Getenv("NICEDAT"); // data location
    t->Add(Form("%s/%04d00/run_%06d.000001.root",folder,run/100,run));
-   t->Draw("wf[0].smpl:Iteration$","abs(wf[0].npe)<100","l",250,1);
-   TText *text = new TText(.8,.8,Form("%d",run));
-   text->SetNDC();
-   text->Draw();
+   t->Draw(Form("wf[%d].smpl:Iteration$",channel),
+			 Form("wf[%d].pls[0].h<50",channel),"l",250,1);
+   TText *text = new TText(.8,.8,Form("%d",run)); text->SetNDC(); text->Draw();
    gPad->Print(Form("wf%d.png",run));
 }
 
-
 // integration range is not fixed by default
-void fit1pe(int run=112, int fixedMin=0, int fixedMax=0)
+void fit1pe(int run=112, int fixedMin=0, int fixedMax=0, int channel=0)
 {
-   if (fixedMin!=0 && fixedMax!=0) DrawWFs(run);
-   Create1PEdistr(run, fixedMin, fixedMax);
+   if (fixedMin!=0 && fixedMax!=0) DrawWFs(run, channel);
+   Create1PEdistr(run, fixedMin, fixedMax, channel);
    Fit1PEdistr(run);
 }
 
