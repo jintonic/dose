@@ -34,7 +34,7 @@ src="$(cd -P "$(dirname "$src")" && pwd)"
 
 # run executable
 cd $NICEDAT/$subdir
-if [ $# -ne 2 ]; then
+if [ $# -eq 2 ]; then
   $src/$name.exe $1 1 $NICEDAT
 else
   if [[ $2 =~ ^[0-9]+$ ]]; then 
